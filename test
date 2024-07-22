@@ -1,0 +1,28 @@
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.HttpResponse;
+
+public class HttpClientExample {
+    public static void main(String[] args) {
+        HttpClient httpClient = HttpClients.createDefault();
+        try {
+            HttpGet request = new HttpGet("http://api.example.com/data"); // Replace with your API endpoint
+
+            HttpResponse response = httpClient.execute(request);
+
+            // Print status code
+            System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+
+            // Print response body
+            String responseBody = EntityUtils.toString(response.getEntity());
+            System.out.println("Response Body : " + responseBody);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Ensure HttpClient is properly closed
+            httpClient.getConnectionManager().shutdown();
+        }
+    }
+}
