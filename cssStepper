@@ -1,0 +1,30 @@
+.stepper-container {
+    display: flex;
+    justify-content: space-between; /* Adjust as needed */
+}
+
+.stepper {
+    position: relative;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.stepper:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -50%;
+    transform: translateY(-50%);
+    width: calc(100% + 50%);
+    height: 2px;
+    background-color: #ccc;
+}
+
+<div class="stepper-container">
+    <div class="stepper">Step 1</div>
+    <div class="stepper">Step 2</div>
+    <div class="stepper">Step 3</div>
+</div>
+
