@@ -1,0 +1,114 @@
+Business Requirement Document (BRD) for Assan Instalment Process
+Introduction
+This document details the Assan Instalment Process followed by the Customer Care Team, encompassing interactions with multiple teams and applications to ensure efficient operation and customer satisfaction.
+
+Assan Instalment Process Overview
+Key Terms
+DAC (Direct Account Credit): Customer requests 95% of their credit card limit as a loan on EMI.
+CAC (Card Account Credit): Customer requests 40% of their credit card limit as a loan on EMI.
+COT (Card Outstanding Transfer): Customer requests to clear their outstanding balances from other banks. COT pays off the outstanding amount and creates an easy EMI plan.
+Retail: Customer wants to convert their purchases into smart EMIs.
+Process Flow
+Customer Care Team Interaction
+
+Customer Care Team contacts the customer or receives a call.
+The team explains the Asan Instalment Schemes (DAC, CAC, COT, Retail) to the customer.
+Customer selects a scheme and the team collects necessary user information.
+The request is logged into the Card400 Application.
+Case Creation in CEMS
+
+Another team reviews the logged information and creates a case in the CEMS (Case Management System).
+Customer Care Checker Team Verification
+
+The checker team listens to the call recordings and verifies the information logged by the Customer Care Team.
+If all information is accurate, the case is assigned to the FMO Team.
+FMO Team Authorization
+
+The FMO Team generates an authorization code and temporarily blocks the payment on the customer’s credit card limit.
+The case is then assigned to the Payment Team.
+Payment Team Processing
+
+The Payment Team transfers the requested amount and creates a Purchase Order (PO) as per the request in the EBBS (Electronic Banking System) application.
+The case is then assigned to the Non-Financial Team.
+Non-Financial Team Plan Creation
+
+The Non-Financial Team creates the EMI plan in the Card400 Application.
+Detailed Questionnaire for Business Requirements
+1. Customer Care Process
+Documentation of Initial Call
+
+How is the initial call to the customer documented?
+What systems or tools are used to log the call details?
+Is there a standard script or checklist followed during the call?
+Information Collection
+
+What specific information is collected from the customer during the call?
+Are there any mandatory fields or data points that must be recorded?
+How is sensitive customer information protected during this process?
+Logging Information
+
+How is the information logged into the Card400 Application?
+Are there any specific forms or interfaces used in Card400 for logging this information?
+How is the accuracy of the entered data ensured?
+2. CEMS Case Creation
+Criteria for Case Creation
+
+What criteria are used by the second team to create a case in CEMS?
+How is the information transferred from the Card400 Application to CEMS?
+Are there any automated checks or validations performed during this transfer?
+Case Creation Process
+
+What are the steps involved in creating a case in CEMS?
+Who is responsible for creating the case in CEMS?
+How is the case tracked once it is created in CEMS?
+3. Verification by Checker Team
+Verification Details
+
+What specific details are verified by the checker team?
+How is the verification process conducted (e.g., listening to recordings, checking logs)?
+Are there any tools or systems used to assist in the verification process?
+Handling Discrepancies
+
+How are discrepancies handled if the information is not accurate?
+What steps are taken to correct or update inaccurate information?
+How is the corrected information communicated back to the initial logging team?
+4. FMO Team Authorization
+Authorization Code Generation
+
+What is the process for generating an authorization code?
+What systems or tools are used to generate the code?
+How is the authorization code validated?
+Blocking Credit Card Limit
+
+How is the credit card limit blocked temporarily?
+What systems or tools are used to manage this blocking?
+What are the next steps if the authorization code generation fails?
+5. Payment Team Processing
+Amount Transfer
+
+How is the amount transfer handled in the EBBS application?
+What steps are taken to initiate and confirm the transfer?
+How is the transfer documented and tracked?
+Purchase Order Creation
+
+What steps are involved in creating a Purchase Order (PO) in EBBS?
+How is the PO linked to the original customer request?
+What information is included in the PO?
+Case Transfer to Non-Financial Team
+
+How is the case information transferred to the Non-Financial Team?
+Are there any specific handover processes or checks?
+How is the case tracked during the handover?
+6. Non-Financial Team Plan Creation
+EMI Plan Creation
+
+What specific details are required to create an EMI plan in the Card400 Application?
+How is the plan creation confirmed and communicated to the customer?
+What steps are taken to ensure the EMI plan is correctly implemented?
+Plan Confirmation and Communication
+
+How is the creation of the EMI plan confirmed internally?
+What methods are used to communicate the plan details to the customer?
+How is customer feedback or queries about the plan handled?
+Conclusion
+This document provides a comprehensive overview of the Assan Instalment Process and a detailed questionnaire to gather business requirements for each step. The goal is to ensure a clear understanding and smooth implementation of the process across all involved teams and application
