@@ -1,0 +1,60 @@
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+public class CustomDataFilter {
+
+    // Convert 2D array to a List of Maps
+    public static List<Map<String, String>> convertToListOfMaps(String[][] data) {
+        List<Map<String, String>> list = new ArrayList<>();
+        String[] headers = data[0];
+
+        for (int i = 1; i < data.length; i++) {
+            Map<String, String> rowMap = new HashMap<>();
+            for (int j = 0; j < headers.length; j++) {
+                rowMap.put(headers[j], data[i][j]);
+            }
+            list.add(rowMap);
+        }
+        return list;
+    }
+
+    // Apply multiple filters
+    public static List<Map<String, String>> filterData(List<Map<String, String>> data, List<Predicate<Map<String, String>>> filters) {
+        return data.stream()
+                .filter(row -> filters.stream().allMatch(filter -> filter.test(row)))
+                .collect(Collectors.toList());
+    }
+
+    public static void main(String[] args) {
+        // Example 2D array: first row is headers, rest are data
+        String[][] data = {
+            {"Name", "Age", "City"},
+            {"Alice", "30", "New York"},
+            {"Bob", "25", "Chicago"},
+            {"Charlie", "35", "New York"},
+            {"Diana", "40", "Chicago"}
+        };
+
+        // Convert to List of Maps
+        List<Map<String, String>> listData = convertToListOfMaps(data);
+
+        // Define filters
+        List<Predicate<Map<String, String>>> filters = new ArrayList<>();
+
+        // Filter by Age greater than or equal to 30
+        filters.add(row -> Integer.parseInt(row.get("Age")) >= 30);
+
+        // Filter by City equals "New York"
+        filters.add(row -> row.get("City").equals("New York"));
+
+        // Apply filters
+        List<Map<String, String>> filteredData = filterData(listData, filters);
+
+        // Print results
+        System.out.println("Filtered Results:");
+        for (Map<String, String> row : filteredData) {
+            System.out.println(row);
+        }
+    }
+}
