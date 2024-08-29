@@ -1,0 +1,40 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+
+public class FilterExample {
+
+    // Define a functional interface for filtering criteria
+    @FunctionalInterface
+    public interface PersonFilter {
+        boolean test(Person person);
+    }
+
+    // Method to filter 2D array based on the custom filter
+    public static List<Person> filter(Person[][] array, PersonFilter filter) {
+        List<Person> result = new ArrayList<>();
+        for (Person[] subArray : array) {
+            for (Person person : subArray) {
+                if (filter.test(person)) {
+                    result.add(person);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        Person[][] people = {
+            { new Person("Alice", 30, "New York"), new Person("Bob", 25, "Chicago") },
+            { new Person("Charlie", 35, "New York"), new Person("Diana", 40, "Chicago") }
+        };
+
+        // Filter by age
+        List<Person> filteredByAge = filter(people, p -> p.getAge() >= 30);
+        System.out.println("People aged 30 or older: " + filteredByAge.size());
+
+        // Filter by age and city
+        List<Person> filteredByAgeAndCity = filter(people, p -> p.getAge() >= 30 && p.getCity().equals("New York"));
+        System.out.println("People aged 30 or older and in New York: " + filteredByAgeAndCity.size());
+    }
+}
