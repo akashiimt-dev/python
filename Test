@@ -1,18 +1,60 @@
-const express = require('express');
-const multer = require('multer');
-const XLSX = require('xlsx');
-const app = express();
-const upload = multer({ dest: 'uploads/' });
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-app.post('/upload', upload.single('excelFile'), (req, res) => {
-  const filePath = req.file.path;
-  const workbook = XLSX.readFile(filePath);
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  const data = XLSX.utils.sheet_to_json(sheet);
-  res.json(data);
-});
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Person {
+    private String firstName;
+    private String lastName;
+    private Integer age;
+    private String email;
 
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
-});
+    // Constructors, getters, and setters
+
+    public Person(String firstName, String lastName, Integer age, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+        this.email = email;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public static void main(String[] args) throws Exception {
+        Person person = new Person("John", "Doe", null, "john.doe@example.com");
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(person);
+
+        System.out.println(jsonString);  // Output: {"firstName":"John","lastName":"Doe","email":"john.doe@example.com"}
+    }
+}
