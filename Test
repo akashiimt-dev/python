@@ -1,60 +1,33 @@
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
+const file = event.target.files[0];
+            if (file) {
+                // Check if the file is of type text/csv
+                if (file.type === 'text/csv') {
+                    readFileAsText(file).then(text => {
+                        // Process the CSV text
+                        const rows = parseCSV(text);
+                        document.getElementById('output').textContent = JSON.stringify(rows, null, 2);
+                    }).catch(error => {
+                        console.error('Error reading file:', error);
+                    });
+                } else {
+                    console.log('Please upload a CSV file.');
+                }
+            } else {
+                console.log('No file selected.');
+            }
+        });
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class Person {
-    private String firstName;
-    private String lastName;
-    private Integer age;
-    private String email;
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsText(file); // Ensure the file parameter is used here
+            });
+        }
 
-    // Constructors, getters, and setters
-
-    public Person(String firstName, String lastName, Integer age, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.age = age;
-        this.email = email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public static void main(String[] args) throws Exception {
-        Person person = new Person("John", "Doe", null, "john.doe@example.com");
-
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonString = mapper.writeValueAsString(person);
-
-        System.out.println(jsonString);  // Output: {"firstName":"John","lastName":"Doe","email":"john.doe@example.com"}
-    }
-}
+        function parseCSV(text) {
+            // Simple CSV parsing: splitting by new lines and commas
+            const rows = text.split('\n').map(row => row.split(','));
+            return rows;
+        }
