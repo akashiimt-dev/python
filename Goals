@@ -1,3 +1,95 @@
-**Activity Name:** Registered for Advanced Python and Data Science Learning Platform
+In GraphQL, mutations are typically used to modify data, whereas queries are used to fetch data. However, you can create a mutation to return data such as the current date, though it's somewhat unconventional. Generally, for fetching data like the current date, you would use a query instead of a mutation.
 
-**Description:** Registered on an educational platform specializing in Python and Data Science to enhance skills and knowledge for further advancement in the field of data science.
+Here’s how you can create a GraphQL query to get the current date and how to implement a mutation if you really need to.
+
+### GraphQL Query to Get Current Date
+
+1. **Define the Query in Your GraphQL Schema:**
+
+   ```graphql
+   type Query {
+       currentDate: String
+   }
+   ```
+
+2. **Implement the Resolver:**
+
+   In your Quarkus application, you will implement the resolver to return the current date. Here’s how you can do it:
+
+   ```java
+   import javax.inject.Singleton;
+   import java.time.LocalDate;
+   import java.time.format.DateTimeFormatter;
+   import io.smallrye.graphql.api.Context;
+   import io.smallrye.graphql.api.Query;
+
+   @Singleton
+   public class DateQuery {
+
+       @Query("currentDate")
+       public String getCurrentDate() {
+           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+           return LocalDate.now().format(formatter);
+       }
+   }
+   ```
+
+3. **Use the Query:**
+
+   You would use a GraphQL query like this:
+
+   ```graphql
+   query {
+       currentDate
+   }
+   ```
+
+### GraphQL Mutation to Get Current Date (Not Recommended)
+
+If you want to use a mutation to get the current date (which is unusual because mutations are intended for changes), here’s how you might define it:
+
+1. **Define the Mutation in Your GraphQL Schema:**
+
+   ```graphql
+   type Mutation {
+       getCurrentDate: String
+   }
+   ```
+
+2. **Implement the Resolver:**
+
+   Implement the mutation resolver to return the current date:
+
+   ```java
+   import javax.inject.Singleton;
+   import java.time.LocalDate;
+   import java.time.format.DateTimeFormatter;
+   import io.smallrye.graphql.api.Mutation;
+
+   @Singleton
+   public class DateMutation {
+
+       @Mutation("getCurrentDate")
+       public String getCurrentDate() {
+           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+           return LocalDate.now().format(formatter);
+       }
+   }
+   ```
+
+3. **Use the Mutation:**
+
+   You would use a GraphQL mutation like this:
+
+   ```graphql
+   mutation {
+       getCurrentDate
+   }
+   ```
+
+### Summary
+
+- **Query**: Prefer using a GraphQL query to fetch data like the current date.
+- **Mutation**: If absolutely necessary, you can use a mutation, but it’s unconventional as mutations are meant for data changes, not retrieval.
+
+Using queries for fetching data such as the current date aligns with typical GraphQL practices and provides a clearer separation of concerns between data retrieval and modification.
