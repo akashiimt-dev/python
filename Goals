@@ -1,95 +1,128 @@
-In GraphQL, mutations are typically used to modify data, whereas queries are used to fetch data. However, you can create a mutation to return data such as the current date, though it's somewhat unconventional. Generally, for fetching data like the current date, you would use a query instead of a mutation.
+In Quarkus, if you want to get data from multiple sources based on a filter applied to one table and then use that filter to retrieve data from another table, you typically use JPA (Java Persistence API) or Panache, which is Quarkus's simplified way to interact with databases.
 
-Here’s how you can create a GraphQL query to get the current date and how to implement a mutation if you really need to.
+Here’s a general approach to achieve this:
 
-### GraphQL Query to Get Current Date
+### 1. Define Your Entities
 
-1. **Define the Query in Your GraphQL Schema:**
+Assuming you have two tables, `TableA` and `TableB`, you first need to define the entities corresponding to these tables.
 
-   ```graphql
-   type Query {
-       currentDate: String
-   }
-   ```
+```java
+@Entity
+public class TableA {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String filterField;
+    // other fields, getters, setters
+}
 
-2. **Implement the Resolver:**
+@Entity
+public class TableB {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Long tableAId;
+    // other fields, getters, setters
+}
+```
 
-   In your Quarkus application, you will implement the resolver to return the current date. Here’s how you can do it:
+### 2. Create Repository Interfaces
 
-   ```java
-   import javax.inject.Singleton;
-   import java.time.LocalDate;
-   import java.time.format.DateTimeFormatter;
-   import io.smallrye.graphql.api.Context;
-   import io.smallrye.graphql.api.Query;
+Use Panache or JPA repositories to interact with these tables.
 
-   @Singleton
-   public class DateQuery {
+For Panache:
 
-       @Query("currentDate")
-       public String getCurrentDate() {
-           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-           return LocalDate.now().format(formatter);
-       }
-   }
-   ```
+```java
+@ApplicationScoped
+public class TableARepository implements PanacheRepository<TableA> {
+    // Custom queries or methods if needed
+}
 
-3. **Use the Query:**
+@ApplicationScoped
+public class TableBRepository implements PanacheRepository<TableB> {
+    // Custom queries or methods if needed
+}
+```
 
-   You would use a GraphQL query like this:
+For JPA:
 
-   ```graphql
-   query {
-       currentDate
-   }
-   ```
+```java
+@ApplicationScoped
+public class TableARepository {
+    @Inject
+    EntityManager em;
 
-### GraphQL Mutation to Get Current Date (Not Recommended)
+    public List<TableA> findByFilter(String filter) {
+        return em.createQuery("SELECT a FROM TableA a WHERE a.filterField = :filter", TableA.class)
+                 .setParameter("filter", filter)
+                 .getResultList();
+    }
+}
 
-If you want to use a mutation to get the current date (which is unusual because mutations are intended for changes), here’s how you might define it:
+@ApplicationScoped
+public class TableBRepository {
+    @Inject
+    EntityManager em;
 
-1. **Define the Mutation in Your GraphQL Schema:**
+    public List<TableB> findByTableAId(Long tableAId) {
+        return em.createQuery("SELECT b FROM TableB b WHERE b.tableAId = :tableAId", TableB.class)
+                 .setParameter("tableAId", tableAId)
+                 .getResultList();
+    }
+}
+```
 
-   ```graphql
-   type Mutation {
-       getCurrentDate: String
-   }
-   ```
+### 3. Service Layer
 
-2. **Implement the Resolver:**
+Create a service that uses these repositories to perform the required operations.
 
-   Implement the mutation resolver to return the current date:
+```java
+@ApplicationScoped
+public class DataService {
+    @Inject
+    TableARepository tableARepository;
+    @Inject
+    TableBRepository tableBRepository;
 
-   ```java
-   import javax.inject.Singleton;
-   import java.time.LocalDate;
-   import java.time.format.DateTimeFormatter;
-   import io.smallrye.graphql.api.Mutation;
+    public List<TableB> getTableBDataBasedOnTableAFilter(String filter) {
+        List<TableA> tableAList = tableARepository.findByFilter(filter);
+        List<TableB> tableBList = new ArrayList<>();
 
-   @Singleton
-   public class DateMutation {
+        for (TableA tableA : tableAList) {
+            List<TableB> results = tableBRepository.findByTableAId(tableA.getId());
+            tableBList.addAll(results);
+        }
 
-       @Mutation("getCurrentDate")
-       public String getCurrentDate() {
-           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-           return LocalDate.now().format(formatter);
-       }
-   }
-   ```
+        return tableBList;
+    }
+}
+```
 
-3. **Use the Mutation:**
+### 4. REST Endpoint
 
-   You would use a GraphQL mutation like this:
+Expose this functionality via a REST endpoint if needed.
 
-   ```graphql
-   mutation {
-       getCurrentDate
-   }
-   ```
+```java
+@Path("/data")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class DataResource {
+    @Inject
+    DataService dataService;
+
+    @GET
+    @Path("/filter/{filter}")
+    public List<TableB> getTableBData(@PathParam("filter") String filter) {
+        return dataService.getTableBDataBasedOnTableAFilter(filter);
+    }
+}
+```
 
 ### Summary
 
-- **Query**: Prefer using a GraphQL query to fetch data like the current date.
-- **Mutation**: If absolutely necessary, you can use a mutation, but it’s unconventional as mutations are meant for data changes, not retrieval.
+1. Define entities for both tables.
+2. Implement repositories or data access methods.
+3. Use a service to orchestrate the fetching and filtering logic.
+4. Expose the service via a REST endpoint if needed.
 
-Using queries for fetching data such as the current date aligns with typical GraphQL practices and provides a clearer separation of concerns between data retrieval and modification.
+By following this approach, you can effectively filter data from one table and use it to retrieve related data from another table in a Quarkus application.
