@@ -1,33 +1,104 @@
-const file = event.target.files[0];
-            if (file) {
-                // Check if the file is of type text/csv
-                if (file.type === 'text/csv') {
-                    readFileAsText(file).then(text => {
-                        // Process the CSV text
-                        const rows = parseCSV(text);
-                        document.getElementById('output').textContent = JSON.stringify(rows, null, 2);
-                    }).catch(error => {
-                        console.error('Error reading file:', error);
-                    });
-                } else {
-                    console.log('Please upload a CSV file.');
-                }
-            } else {
-                console.log('No file selected.');
-            }
-        });
+If you want a more streamlined approach to fetching and filtering data from multiple tables in Quarkus, you can leverage the power of SQL joins and native queries. This can be more efficient, especially if you are working with large datasets and want to avoid multiple round-trips to the database.
 
-        function readFileAsText(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(reader.error);
-                reader.readAsText(file); // Ensure the file parameter is used here
-            });
-        }
+Here’s a more optimistic approach using native queries or JPQL to achieve your goal:
 
-        function parseCSV(text) {
-            // Simple CSV parsing: splitting by new lines and commas
-            const rows = text.split('\n').map(row => row.split(','));
-            return rows;
-        }
+### 1. Define Your Entities
+
+Define entities as usual, but you don’t need to change much from the previous setup.
+
+```java
+@Entity
+public class TableA {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String filterField;
+    // other fields, getters, setters
+}
+
+@Entity
+public class TableB {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Long tableAId;
+    // other fields, getters, setters
+}
+```
+
+### 2. Write a Repository with a Custom Query
+
+Use a repository with a native query or JPQL to fetch the data in one go. This approach avoids the need for multiple queries and loops in the service layer.
+
+```java
+@ApplicationScoped
+public class DataRepository {
+    @Inject
+    EntityManager em;
+
+    public List<TableB> findTableBByFilter(String filter) {
+        // JPQL approach
+        return em.createQuery(
+            "SELECT b FROM TableB b JOIN TableA a ON a.id = b.tableAId WHERE a.filterField = :filter", 
+            TableB.class
+        )
+        .setParameter("filter", filter)
+        .getResultList();
+    }
+
+    // Alternatively, use a native SQL query
+    public List<TableB> findTableBByFilterNative(String filter) {
+        return em.createNativeQuery(
+            "SELECT b.* FROM TableB b INNER JOIN TableA a ON a.id = b.tableAId WHERE a.filterField = :filter", 
+            TableB.class
+        )
+        .setParameter("filter", filter)
+        .getResultList();
+    }
+}
+```
+
+### 3. Service Layer
+
+Use the repository to perform the data retrieval in a single call.
+
+```java
+@ApplicationScoped
+public class DataService {
+    @Inject
+    DataRepository dataRepository;
+
+    public List<TableB> getTableBDataBasedOnTableAFilter(String filter) {
+        return dataRepository.findTableBByFilter(filter);
+    }
+}
+```
+
+### 4. REST Endpoint
+
+Expose the service via a REST endpoint.
+
+```java
+@Path("/data")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class DataResource {
+    @Inject
+    DataService dataService;
+
+    @GET
+    @Path("/filter/{filter}")
+    public List<TableB> getTableBData(@PathParam("filter") String filter) {
+        return dataService.getTableBDataBasedOnTableAFilter(filter);
+    }
+}
+```
+
+### Summary
+
+1. **Use JPQL or native SQL:** Write a single query that joins `TableA` and `TableB` and applies the filter.
+2. **Repository:** Implement the query in your repository.
+3. **Service Layer:** Call the repository method directly.
+4. **REST Endpoint:** Expose the functionality through a REST endpoint if needed.
+
+This approach minimizes the number of database calls and keeps the logic simple and efficient. It leverages the power of SQL joins or JPQL to perform complex data retrieval in a single query, which can be more performant and easier to manage.
