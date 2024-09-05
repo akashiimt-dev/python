@@ -1,104 +1,123 @@
-If you want a more streamlined approach to fetching and filtering data from multiple tables in Quarkus, you can leverage the power of SQL joins and native queries. This can be more efficient, especially if you are working with large datasets and want to avoid multiple round-trips to the database.
+To retrieve data from multiple tables where some fields are from one table and some are from another, you can use JPQL or native SQL queries to perform a join and select specific fields. Here’s how you can achieve this in Quarkus:
 
-Here’s a more optimistic approach using native queries or JPQL to achieve your goal:
+### Step-by-Step Example
 
-### 1. Define Your Entities
+1. **Define Entities**
 
-Define entities as usual, but you don’t need to change much from the previous setup.
+   Assume you have two tables, `Table1` and `Table2`, and you want to retrieve data from both:
 
-```java
-@Entity
-public class TableA {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String filterField;
-    // other fields, getters, setters
-}
+   ```java
+   @Entity
+   @Table(name = "table1")
+   public class Table1 {
+       @Id
+       @GeneratedValue(strategy = GenerationType.IDENTITY)
+       private Long id;
+       private String field1;
+       // other fields, getters, and setters
+   }
 
-@Entity
-public class TableB {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private Long tableAId;
-    // other fields, getters, setters
-}
-```
+   @Entity
+   @Table(name = "table2")
+   public class Table2 {
+       @Id
+       @GeneratedValue(strategy = GenerationType.IDENTITY)
+       private Long id;
+       private String field2;
+       private Long table1Id;  // Foreign key to Table1
+       // other fields, getters, and setters
+   }
+   ```
 
-### 2. Write a Repository with a Custom Query
+2. **Create Repositories**
 
-Use a repository with a native query or JPQL to fetch the data in one go. This approach avoids the need for multiple queries and loops in the service layer.
+   Define repositories for each table using Panache.
 
-```java
-@ApplicationScoped
-public class DataRepository {
-    @Inject
-    EntityManager em;
+   ```java
+   @ApplicationScoped
+   public class Table1Repository implements PanacheRepository<Table1> {
+       // Custom queries and methods if needed
+   }
 
-    public List<TableB> findTableBByFilter(String filter) {
-        // JPQL approach
-        return em.createQuery(
-            "SELECT b FROM TableB b JOIN TableA a ON a.id = b.tableAId WHERE a.filterField = :filter", 
-            TableB.class
-        )
-        .setParameter("filter", filter)
-        .getResultList();
-    }
+   @ApplicationScoped
+   public class Table2Repository implements PanacheRepository<Table2> {
+       // Custom queries and methods if needed
+   }
+   ```
 
-    // Alternatively, use a native SQL query
-    public List<TableB> findTableBByFilterNative(String filter) {
-        return em.createNativeQuery(
-            "SELECT b.* FROM TableB b INNER JOIN TableA a ON a.id = b.tableAId WHERE a.filterField = :filter", 
-            TableB.class
-        )
-        .setParameter("filter", filter)
-        .getResultList();
-    }
-}
-```
+3. **DTO Class**
 
-### 3. Service Layer
+   Define a DTO class to hold the combined data from both tables.
 
-Use the repository to perform the data retrieval in a single call.
+   ```java
+   public class CombinedDTO {
+       private String field1;
+       private String field2;
 
-```java
-@ApplicationScoped
-public class DataService {
-    @Inject
-    DataRepository dataRepository;
+       public CombinedDTO(String field1, String field2) {
+           this.field1 = field1;
+           this.field2 = field2;
+       }
 
-    public List<TableB> getTableBDataBasedOnTableAFilter(String filter) {
-        return dataRepository.findTableBByFilter(filter);
-    }
-}
-```
+       // getters and setters
+   }
+   ```
 
-### 4. REST Endpoint
+4. **Service Layer**
 
-Expose the service via a REST endpoint.
+   Implement a service layer method to execute the query and populate the DTO.
 
-```java
-@Path("/data")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class DataResource {
-    @Inject
-    DataService dataService;
+   ```java
+   @ApplicationScoped
+   public class MyService {
 
-    @GET
-    @Path("/filter/{filter}")
-    public List<TableB> getTableBData(@PathParam("filter") String filter) {
-        return dataService.getTableBDataBasedOnTableAFilter(filter);
-    }
-}
-```
+       @Inject
+       Table1Repository table1Repo;
+
+       @Inject
+       Table2Repository table2Repo;
+
+       @Transactional
+       public List<CombinedDTO> getCombinedData() {
+           // JPQL query to join tables and select specific fields
+           String jpql = "SELECT new com.example.CombinedDTO(t1.field1, t2.field2) " +
+                         "FROM Table1 t1 JOIN Table2 t2 ON t1.id = t2.table1Id";
+
+           List<CombinedDTO> results = table1Repo.getEntityManager()
+               .createQuery(jpql, CombinedDTO.class)
+               .getResultList();
+
+           return results;
+       }
+   }
+   ```
+
+5. **Usage**
+
+   Call the `getCombinedData` method from your resource or controller.
+
+   ```java
+   @Path("/data")
+   @Produces(MediaType.APPLICATION_JSON)
+   @Consumes(MediaType.APPLICATION_JSON)
+   public class MyResource {
+
+       @Inject
+       MyService myService;
+
+       @GET
+       public List<CombinedDTO> getData() {
+           return myService.getCombinedData();
+       }
+   }
+   ```
 
 ### Summary
 
-1. **Use JPQL or native SQL:** Write a single query that joins `TableA` and `TableB` and applies the filter.
-2. **Repository:** Implement the query in your repository.
-3. **Service Layer:** Call the repository method directly.
-4. **REST Endpoint:** Expose the functionality through a REST endpoint if needed.
+- **Entities**: Define JPA entities for your tables.
+- **Repositories**: Use Panache repositories for database operations.
+- **DTO**: Create a Data Transfer Object to hold the combined result.
+- **Service Layer**: Implement a method using JPQL to join tables and fetch specific fields.
+- **Resource**: Expose the data via a REST endpoint.
 
-This approach minimizes the number of database calls and keeps the logic simple and efficient. It leverages the power of SQL joins or JPQL to perform complex data retrieval in a single query, which can be more performant and easier to manage.
+This approach ensures you can efficiently fetch and combine data from multiple tables into a single DTO.
