@@ -1,123 +1,23 @@
-To retrieve data from multiple tables where some fields are from one table and some are from another, you can use JPQL or native SQL queries to perform a join and select specific fields. Here’s how you can achieve this in Quarkus:
+Here’s an updated tubular format with additional details for integration and testing:
 
-### Step-by-Step Example
+| **Module/Component**               | **Description**                                           | **Status**   | **Notes**                           |
+|-----------------------------------|-----------------------------------------------------------|--------------|-------------------------------------|
+| **Activity Module**               | Core module managing activities.                         | Pending      |                                     |
+| **Case Pending Items**            | Interface displaying items pending action.              | Pending      |                                     |
+| **New Activity Main UI**          | Main UI for creating new activities.                     | Pending      |                                     |
+| **Compose Email UI**              | UI for composing emails related to activities.           | Pending      |                                     |
+| **Transfer Email UI**             | UI for transferring emails between users or groups.       | Pending      |                                     |
+| **Service Request Link UI**       | UI for linking to service requests.                       | Pending      |                                     |
+| **Complaint Link UI**             | UI for linking to complaints.                            | Pending      |                                     |
+| **API Activity**                  | API endpoints related to activity data.                  | Pending      |                                     |
+| **Get Activity Type**             | API to fetch types of activities.                        | Pending      |                                     |
+| **Get Group Type**                | API to fetch types of groups.                            | Pending      |                                     |
+| **Get SR Number on Basis of Group**| API to fetch service request number based on group.      | Pending      |                                     |
+| **Get Email ID**                  | API to retrieve email IDs associated with activities.    | Pending      | New addition                         |
+| **Add Email Template**            | API to add and manage email templates.                   | Pending      | New addition                         |
+| **Transfer Screen**               | Screen to manage and execute email transfers.            | Pending      | New addition                         |
+| **Created Activity Link**         | Link to view details of the created activity.            | Pending      | New addition                         |
+| **Non-Edit Screen**               | Screen for viewing activity information without editing. | Pending      | New addition                         |
+| **Integration and Testing**       | Integration of all components and comprehensive testing. | Pending      | Includes new APIs and UI components. |
 
-1. **Define Entities**
-
-   Assume you have two tables, `Table1` and `Table2`, and you want to retrieve data from both:
-
-   ```java
-   @Entity
-   @Table(name = "table1")
-   public class Table1 {
-       @Id
-       @GeneratedValue(strategy = GenerationType.IDENTITY)
-       private Long id;
-       private String field1;
-       // other fields, getters, and setters
-   }
-
-   @Entity
-   @Table(name = "table2")
-   public class Table2 {
-       @Id
-       @GeneratedValue(strategy = GenerationType.IDENTITY)
-       private Long id;
-       private String field2;
-       private Long table1Id;  // Foreign key to Table1
-       // other fields, getters, and setters
-   }
-   ```
-
-2. **Create Repositories**
-
-   Define repositories for each table using Panache.
-
-   ```java
-   @ApplicationScoped
-   public class Table1Repository implements PanacheRepository<Table1> {
-       // Custom queries and methods if needed
-   }
-
-   @ApplicationScoped
-   public class Table2Repository implements PanacheRepository<Table2> {
-       // Custom queries and methods if needed
-   }
-   ```
-
-3. **DTO Class**
-
-   Define a DTO class to hold the combined data from both tables.
-
-   ```java
-   public class CombinedDTO {
-       private String field1;
-       private String field2;
-
-       public CombinedDTO(String field1, String field2) {
-           this.field1 = field1;
-           this.field2 = field2;
-       }
-
-       // getters and setters
-   }
-   ```
-
-4. **Service Layer**
-
-   Implement a service layer method to execute the query and populate the DTO.
-
-   ```java
-   @ApplicationScoped
-   public class MyService {
-
-       @Inject
-       Table1Repository table1Repo;
-
-       @Inject
-       Table2Repository table2Repo;
-
-       @Transactional
-       public List<CombinedDTO> getCombinedData() {
-           // JPQL query to join tables and select specific fields
-           String jpql = "SELECT new com.example.CombinedDTO(t1.field1, t2.field2) " +
-                         "FROM Table1 t1 JOIN Table2 t2 ON t1.id = t2.table1Id";
-
-           List<CombinedDTO> results = table1Repo.getEntityManager()
-               .createQuery(jpql, CombinedDTO.class)
-               .getResultList();
-
-           return results;
-       }
-   }
-   ```
-
-5. **Usage**
-
-   Call the `getCombinedData` method from your resource or controller.
-
-   ```java
-   @Path("/data")
-   @Produces(MediaType.APPLICATION_JSON)
-   @Consumes(MediaType.APPLICATION_JSON)
-   public class MyResource {
-
-       @Inject
-       MyService myService;
-
-       @GET
-       public List<CombinedDTO> getData() {
-           return myService.getCombinedData();
-       }
-   }
-   ```
-
-### Summary
-
-- **Entities**: Define JPA entities for your tables.
-- **Repositories**: Use Panache repositories for database operations.
-- **DTO**: Create a Data Transfer Object to hold the combined result.
-- **Service Layer**: Implement a method using JPQL to join tables and fetch specific fields.
-- **Resource**: Expose the data via a REST endpoint.
-
-This approach ensures you can efficiently fetch and combine data from multiple tables into a single DTO.
+This detailed format includes new components and their descriptions to help guide integration and testing processes.
