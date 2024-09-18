@@ -1,23 +1,8 @@
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+// Convert the object to an array of [key, value] pairs
+const filteredEntries = Object.entries(obj).filter(([key, value]) => value > 10);
 
-import java.io.FileInputStream;
-import java.io.IOException;
+// Convert the filtered entries back to an object
+const filteredObj = Object.fromEntries(filteredEntries);
 
-public class ExcelCRUDExample {
-
-    public static void main(String[] args) {
-        try (FileInputStream fileIn = new FileInputStream("data.xlsx");
-             Workbook workbook = new XSSFWorkbook(fileIn)) {
-            Sheet sheet = workbook.getSheetAt(0); // Assuming first sheet
-            for (Row row : sheet) {
-                for (Cell cell : row) {
-                    System.out.print(cell.getStringCellValue() + "\t");
-                }
-                System.out.println();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-}
+console.log(filteredObj);
+// Output: { b: 25, c: 40 }
