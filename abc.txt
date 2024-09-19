@@ -1,8 +1,34 @@
-// Convert the object to an array of [key, value] pairs
-const filteredEntries = Object.entries(obj).filter(([key, value]) => value > 10);
+function resetValues(obj) {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const value = obj[key];
+      if (typeof value === 'string') {
+        obj[key] = ''; // Reset string to blank
+      } else if (typeof value === 'number') {
+        obj[key] = 0; // Reset number to zero
+      } else if (typeof value === 'boolean') {
+        obj[key] = false; // Reset boolean to false
+      } else if (Array.isArray(value)) {
+        obj[key] = []; // Reset array to empty
+      } else if (value !== null && typeof value === 'object') {
+        resetValues(value); // Recursively reset nested objects
+      }
+    }
+  }
+}
 
-// Convert the filtered entries back to an object
-const filteredObj = Object.fromEntries(filteredEntries);
+// Example usage
+const formData = {
+  name: 'John',
+  age: 30,
+  isActive: true,
+  preferences: {
+    theme: 'dark',
+    notifications: false,
+  },
+  items: ['item1', 'item2'],
+};
 
-console.log(filteredObj);
-// Output: { b: 25, c: 40 }
+console.log('Before reset:', formData);
+resetValues(formData);
+console.log('After reset:', formData);
