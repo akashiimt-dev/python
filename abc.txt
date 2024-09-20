@@ -1,34 +1,14 @@
-function resetValues(obj) {
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      const value = obj[key];
-      if (typeof value === 'string') {
-        obj[key] = ''; // Reset string to blank
-      } else if (typeof value === 'number') {
-        obj[key] = 0; // Reset number to zero
-      } else if (typeof value === 'boolean') {
-        obj[key] = false; // Reset boolean to false
-      } else if (Array.isArray(value)) {
-        obj[key] = []; // Reset array to empty
-      } else if (value !== null && typeof value === 'object') {
-        resetValues(value); // Recursively reset nested objects
-      }
-    }
-  }
-}
+To assign the task to Usain regarding the retrieval of link information from Active Case and Link Services based on the Activity Number, here's a streamlined approach:
 
-// Example usage
-const formData = {
-  name: 'John',
-  age: 30,
-  isActive: true,
-  preferences: {
-    theme: 'dark',
-    notifications: false,
-  },
-  items: ['item1', 'item2'],
-};
+1. **Objective**: Retrieve all link information and correspondence notes for a specific Activity Number.
 
-console.log('Before reset:', formData);
-resetValues(formData);
-console.log('After reset:', formData);
+2. **Steps**:
+   - Use the Activity Number to query the Active Case API.
+   - Gather all relevant link information.
+   - Simultaneously, query the Link Services API for additional data.
+   - Collect all correspondence notes related to the Activity Number.
+
+3. **Notes**: 
+   - Park the complaint handling for the time being.
+
+Please let me know if you need further details or adjustments!
