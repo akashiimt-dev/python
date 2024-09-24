@@ -1,14 +1,18 @@
-To assign the task to Usain regarding the retrieval of link information from Active Case and Link Services based on the Activity Number, here's a streamlined approach:
+const array = [
+  { key: 'value1', otherKey: 1 },
+  { key: 2, otherKey: 'data2' },
+  { key: 'value3', otherKey: 3 }
+];
 
-1. **Objective**: Retrieve all link information and correspondence notes for a specific Activity Number.
+// Set default values
+array.forEach(obj => {
+  if (typeof obj.key === 'string') {
+    obj.key = ''; // Default to blank string
+  } else if (typeof obj.key === 'number') {
+    obj.key = 0; // Default to 0
+  } else {
+    obj.key = []; // Default to empty array for other types
+  }
+});
 
-2. **Steps**:
-   - Use the Activity Number to query the Active Case API.
-   - Gather all relevant link information.
-   - Simultaneously, query the Link Services API for additional data.
-   - Collect all correspondence notes related to the Activity Number.
-
-3. **Notes**: 
-   - Park the complaint handling for the time being.
-
-Please let me know if you need further details or adjustments!
+console.log(array);
