@@ -1,18 +1,25 @@
-const array = [
-  { key: 'value1', otherKey: 1 },
-  { key: 2, otherKey: 'data2' },
-  { key: 'value3', otherKey: 3 }
-];
+### Draft Flow
 
-// Set default values
-array.forEach(obj => {
-  if (typeof obj.key === 'string') {
-    obj.key = ''; // Default to blank string
-  } else if (typeof obj.key === 'number') {
-    obj.key = 0; // Default to 0
-  } else {
-    obj.key = []; // Default to empty array for other types
-  }
-});
+1. **Activity Creation**
+   - User inputs: Client Name, Client ID, FM Name, FM ID, and Contact Details.
+   - Data Source: These details will come from the **Client** and **FM** tables.
 
-console.log(array);
+2. **Data Submission**
+   - Upon clicking **Submit**, the data will be processed.
+   - Data will be transferred to:
+     - **Activity Data Table**
+     - **Work Basket Table**
+
+3. **Activity Atom Page**
+   - After submission, the user will be directed to the **Activity Atom Page**.
+
+4. **Workflow Resolution**
+   - If the activity is resolved on the Activity Atom Page:
+     - The relevant workflow (e.g., **Resolve Activity Workflow**) will be triggered.
+
+### Open Questions
+
+- Which specific tables contain the contact details?
+- What are the conditions for transitioning to the Activity Atom Page?
+- What specific workflow should be called upon resolution of the activity?
+- Are there any additional data validation steps before submission?
