@@ -1,30 +1,5 @@
-import { LitElement, html, css } from 'lit';
+let dateStr = "2024-09-25T00:00:00";
+let date = new Date(dateStr);
+let formattedDate = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-class MyForm extends LitElement {
-  static styles = css`/* Your styles here */`;
-
-  validate() {
-    const requiredFields = this.shadowRoot.querySelectorAll('[required]');
-    let isValid = true;
-    requiredFields.forEach(field => {
-      if (!field.value) {
-        field.setCustomValidity('This field is required.');
-        isValid = false;
-      } else {
-        field.setCustomValidity('');
-      }
-    });
-    return isValid;
-  }
-
-  render() {
-    return html`
-      <form @submit="${(e) => { e.preventDefault(); if (this.validate()) { /* Submit logic */ } }}">
-        <input type="text" required placeholder="Required Field">
-        <input type="submit" value="Submit">
-      </form>
-    `;
-  }
-}
-
-customElements.define('my-form', MyForm);
+console.log(formattedDate); // Output: "25 Sep 2024"
