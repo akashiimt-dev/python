@@ -1,5 +1,0 @@
-let dateStr = "2024-09-25T00:00:00";
-let date = new Date(dateStr);
-let formattedDate = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-
-console.log(formattedDate); // Output: "25 Sep 2024"
