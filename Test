@@ -1,0 +1,25 @@
+import { LitElement, html, css } from 'lit';
+
+class ErrorPage extends LitElement {
+  static styles = css`
+    .error-container {
+      text-align: center;
+      margin-top: 50px;
+    }
+    .error-title {
+      font-size: 2em;
+      color: red;
+    }
+  `;
+
+  render() {
+    return html`
+      <div class="error-container">
+        <h1 class="error-title">An Error Occurred</h1>
+        <p>Please try again later.</p>
+      </div>
+    `;
+  }
+}
+
+customElements.define('error-page', ErrorPage);
