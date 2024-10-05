@@ -1,25 +1,30 @@
-### Draft Flow
+// dropdown-utils.js
+export function addDropdownEventListeners(dropdown) {
+  dropdown.addEventListener('keydown', (event) => {
+    const items = Array.from(dropdown.querySelectorAll('li'));
+    const currentIndex = items.findIndex(item => item === document.activeElement);
 
-1. **Activity Creation**
-   - User inputs: Client Name, Client ID, FM Name, FM ID, and Contact Details.
-   - Data Source: These details will come from the **Client** and **FM** tables.
-
-2. **Data Submission**
-   - Upon clicking **Submit**, the data will be processed.
-   - Data will be transferred to:
-     - **Activity Data Table**
-     - **Work Basket Table**
-
-3. **Activity Atom Page**
-   - After submission, the user will be directed to the **Activity Atom Page**.
-
-4. **Workflow Resolution**
-   - If the activity is resolved on the Activity Atom Page:
-     - The relevant workflow (e.g., **Resolve Activity Workflow**) will be triggered.
-
-### Open Questions
-
-- Which specific tables contain the contact details?
-- What are the conditions for transitioning to the Activity Atom Page?
-- What specific workflow should be called upon resolution of the activity?
-- Are there any additional data validation steps before submission?
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % items.length;
+        items[nextIndex].focus();
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + items.length) % items.length;
+        items[prevIndex].focus();
+        break;
+      case 'Enter':
+      case 'Space':
+        if (currentIndex > -1) {
+          console.log(`Selected: ${items[currentIndex].textContent}`);
+          dropdown.parentElement.querySelector('button').focus(); // Return focus to button
+        }
+        break;
+      case 'Escape':
+        dropdown.parentElement.querySelector('button').focus(); // Return focus to button
+        break;
+    }
+  });
+}
