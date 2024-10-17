@@ -1,21 +1,26 @@
-// Assuming this is within an event handler function
 function handleFileChange(e) {
   const filesArray = Array.from(e.target.files); // Convert FileList to an array
 
-  // Function to rename a file in the array
-  function renameFile(index, newName) {
-    const oldFile = filesArray[index];
-    const newFile = new File([oldFile], newName, {
-      type: oldFile.type,
-      lastModified: oldFile.lastModified
-    });
-    
-    // Replace the old file with the new file
-    filesArray[index] = newFile;
+  // Function to rename a file by its original name
+  function renameFile(oldName, newName) {
+    const fileIndex = filesArray.findIndex(file => file.name === oldName);
+    if (fileIndex !== -1) {
+      const oldFile = filesArray[fileIndex];
+      const newFile = new File([oldFile], newName, {
+        type: oldFile.type,
+        lastModified: oldFile.lastModified
+      });
+
+      // Replace the old file with the new file
+      filesArray[fileIndex] = newFile;
+      console.log(`Renamed "${oldName}" to "${newName}"`);
+    } else {
+      console.log(`File "${oldName}" not found.`);
+    }
   }
 
-  // Example renaming of the first file
-  renameFile(0, "new_file_name.txt");
+  // Example: Rename a file
+  renameFile("file1.txt", "new_file1.txt");
 
   // Logging the renamed files
   console.log(filesArray.map(file => file.name));
