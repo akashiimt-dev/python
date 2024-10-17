@@ -1,30 +1,25 @@
-// dropdown-utils.js
-export function addDropdownEventListeners(dropdown) {
-  dropdown.addEventListener('keydown', (event) => {
-    const items = Array.from(dropdown.querySelectorAll('li'));
-    const currentIndex = items.findIndex(item => item === document.activeElement);
+// Assuming this is within an event handler function
+function handleFileChange(e) {
+  const filesArray = Array.from(e.target.files); // Convert FileList to an array
 
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        const nextIndex = (currentIndex + 1) % items.length;
-        items[nextIndex].focus();
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        const prevIndex = (currentIndex - 1 + items.length) % items.length;
-        items[prevIndex].focus();
-        break;
-      case 'Enter':
-      case 'Space':
-        if (currentIndex > -1) {
-          console.log(`Selected: ${items[currentIndex].textContent}`);
-          dropdown.parentElement.querySelector('button').focus(); // Return focus to button
-        }
-        break;
-      case 'Escape':
-        dropdown.parentElement.querySelector('button').focus(); // Return focus to button
-        break;
-    }
-  });
+  // Function to rename a file in the array
+  function renameFile(index, newName) {
+    const oldFile = filesArray[index];
+    const newFile = new File([oldFile], newName, {
+      type: oldFile.type,
+      lastModified: oldFile.lastModified
+    });
+    
+    // Replace the old file with the new file
+    filesArray[index] = newFile;
+  }
+
+  // Example renaming of the first file
+  renameFile(0, "new_file_name.txt");
+
+  // Logging the renamed files
+  console.log(filesArray.map(file => file.name));
 }
+
+// Example usage in an HTML input
+// <input type="file" multiple onchange="handleFileChange(event)" />
