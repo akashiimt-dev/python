@@ -1,4 +1,7 @@
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Arrays;
 
 public class CountryAccessChecker {
@@ -9,31 +12,40 @@ public class CountryAccessChecker {
         this.restrictedCountries = restrictedCountries;
     }
 
-    public boolean canRaiseAccess(String requestFrom, String requestTo) {
-        // Iterate through the restricted countries list
-        for (Object[] countryRestriction : restrictedCountries) {
-            String restrictedFromCountry = (String) countryRestriction[0];
-            String restrictedCountryCodes = (String) countryRestriction[1];
-            
-            // Split the comma-separated restricted countries for this specific restrictedFromCountry
-            List<String> restrictedList = Arrays.asList(restrictedCountryCodes.split(","));
-            
-            // If requestFrom matches the restricted country and requestTo is in its restricted list, deny access
-            if (restrictedFromCountry.equals(requestFrom) && restrictedList.contains(requestTo)) {
-                System.out.println("Access denied: " + requestFrom + " cannot raise access to " + requestTo + " because it is restricted.");
-                return false;
+    public Set<String> getRestrictedAccessCountries(List<String> requestFromList) {
+        Set<String> restrictedAccessCountries = new HashSet<>();
+
+        // Identify all restricted countries based on requestFrom countries
+        for (String requestFrom : requestFromList) {
+            for (Object[] countryRestriction : restrictedCountries) {
+                String restrictedFromCountry = (String) countryRestriction[0];
+                String restrictedCountryCodes = (String) countryRestriction[1];
+
+                // If this requestFrom has any restrictions, add them to the restricted set
+                if (restrictedFromCountry.equals(requestFrom)) {
+                    restrictedAccessCountries.addAll(Arrays.asList(restrictedCountryCodes.split(",")));
+                }
             }
         }
-        System.out.println("Access allowed from " + requestFrom + " to " + requestTo);
-        return true;
+
+        return restrictedAccessCountries;
     }
 
-    public void checkAccessForRequests(List<String> requestFromList, List<String> requestToList) {
-        for (String requestFrom : requestFromList) {
-            for (String requestTo : requestToList) {
-                canRaiseAccess(requestFrom, requestTo);
+    public List<String> getAllowedAccessList(List<String> requestFromList, List<String> requestToList) {
+        // Get all restricted countries for the given requestFrom countries
+        Set<String> restrictedAccessCountries = getRestrictedAccessCountries(requestFromList);
+
+        // Prepare the final list of allowed access countries
+        List<String> allowedAccessList = new ArrayList<>();
+        
+        for (String requestTo : requestToList) {
+            // Add to allowed list only if requestTo is not in restricted countries
+            if (!restrictedAccessCountries.contains(requestTo)) {
+                allowedAccessList.add(requestTo);
             }
         }
+
+        return allowedAccessList;
     }
 
     public static void main(String[] args) {
@@ -49,7 +61,9 @@ public class CountryAccessChecker {
         List<String> requestFromList = List.of("IN", "US");
         List<String> requestToList = List.of("SG", "IN", "PK");
 
-        // Check access for each pair in the lists
-        checker.checkAccessForRequests(requestFromList, requestToList);
+        // Get the final list of allowed access
+        List<String> allowedAccessList = checker.getAllowedAccessList(requestFromList, requestToList);
+        
+        System.out.println("Allowed access can be raised for: " + allowedAccessList);
     }
 }
