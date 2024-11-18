@@ -1,69 +1,9 @@
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Arrays;
+Value Behavior Commentary:
 
-public class CountryAccessChecker {
+I have proactively managed the Service Bench activity module, ensuring seamless operation and demonstrating strong ownership. By delivering the TW CA automation project, I achieved over 5 Full-Time Equivalent (FTE) savings for the business, showcasing my commitment to efficiency and value creation. To enhance my skills, I completed Python essentials, reflecting my dedication to continuous improvement and adaptability. Additionally, I have empowered team members to effectively utilize Service Bench, fostering a collaborative environment and contributing to our collective success. Throughout these initiatives, I have consistently supported the business without any escalations, maintaining a high standard of service and reliability.
 
-    private List<Object[]> restrictedCountries;
+Performance Behavior Commentary:
 
-    public CountryAccessChecker(List<Object[]> restrictedCountries) {
-        this.restrictedCountries = restrictedCountries;
-    }
+My autonomous management of the Service Bench activity module highlights my strong problem-solving abilities and technical proficiency. The successful implementation of the TW CA automation project, leading to significant resource savings, showcases my strategic thinking and positive impact on business operations. My commitment to professional development, as evidenced by completing Python essentials, indicates a forward-thinking mindset and readiness to embrace new technologies. By enabling colleagues to leverage Service Bench, I have promoted knowledge sharing and teamwork, positively influencing the team’s overall performance. Notably, I have maintained consistent support for the business without any escalations, reflecting my dedication to delivering quality results and effectively managing challenges.
 
-    public Set<String> getRestrictedAccessCountries(List<String> requestFromList) {
-        Set<String> restrictedAccessCountries = new HashSet<>();
-
-        // Identify all restricted countries based on requestFrom countries
-        for (String requestFrom : requestFromList) {
-            for (Object[] countryRestriction : restrictedCountries) {
-                String restrictedFromCountry = (String) countryRestriction[0];
-                String restrictedCountryCodes = (String) countryRestriction[1];
-
-                // If this requestFrom has any restrictions, add them to the restricted set
-                if (restrictedFromCountry.equals(requestFrom)) {
-                    restrictedAccessCountries.addAll(Arrays.asList(restrictedCountryCodes.split(",")));
-                }
-            }
-        }
-
-        return restrictedAccessCountries;
-    }
-
-    public List<String> getAllowedAccessList(List<String> requestFromList, List<String> requestToList) {
-        // Get all restricted countries for the given requestFrom countries
-        Set<String> restrictedAccessCountries = getRestrictedAccessCountries(requestFromList);
-
-        // Prepare the final list of allowed access countries
-        List<String> allowedAccessList = new ArrayList<>();
-        
-        for (String requestTo : requestToList) {
-            // Add to allowed list only if requestTo is not in restricted countries
-            if (!restrictedAccessCountries.contains(requestTo)) {
-                allowedAccessList.add(requestTo);
-            }
-        }
-
-        return allowedAccessList;
-    }
-
-    public static void main(String[] args) {
-        // Define restricted countries in List<Object[]>
-        List<Object[]> restrictedCountries = List.of(
-            new Object[]{"IN", "PK,SG"},
-            new Object[]{"PK", "KP,IN"}
-        );
-
-        CountryAccessChecker checker = new CountryAccessChecker(restrictedCountries);
-
-        // Define requestFrom and requestTo lists
-        List<String> requestFromList = List.of("IN", "US");
-        List<String> requestToList = List.of("SG", "IN", "PK");
-
-        // Get the final list of allowed access
-        List<String> allowedAccessList = checker.getAllowedAccessList(requestFromList, requestToList);
-        
-        System.out.println("Allowed access can be raised for: " + allowedAccessList);
-    }
-}
+Looking ahead, I am eager to take on more complex projects and mentor junior team members, aligning with our organizational goals and contributing to our continued success.
