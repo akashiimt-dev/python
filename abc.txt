@@ -1,4 +1,4 @@
-mbnd contributing to our continued success
+ni mbnd contributing to our continued success
 
 
 function getAllCountryDetailsSorted() {
@@ -507,6 +507,162 @@ public class EmailRepository {
             LOGGER.severe("Error fetching email: " + e.getMessage());
             return null;
         }
+    }
+}
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+@ApplicationScoped
+public class EmailRepository {
+
+    @Inject
+    EntityManager entityManager;
+
+    private static final Logger LOGGER = Logger.getLogger(EmailRepository.class.getName());
+
+    /**
+     * Retrieves a list of email IDs based on given parameters.
+     * - Handles multiple email columns in EmailTeamInfoTable.
+     * - Parses comma-separated emails into a list.
+     * - Trims and lowercases all values for consistency.
+     * - Maps "FMO" and "Market" both to ["FMO", "Markets"].
+     *
+     * @param pupilWiseId      Unique identifier (trimmed & lowercased).
+     * @param country          Country code (trimmed & lowercased).
+     * @param businessFunction Business function (trimmed & lowercased).
+     * @param workGroup        Workgroup (trimmed & lowercased).
+     * @return A list of email IDs if found, otherwise an empty list.
+     */
+    @Transactional
+    public List<String> getEmailList(String pupilWiseId, String country, String businessFunction, String workGroup) {
+        try {
+            // Convert inputs to lowercase & trim to avoid mismatches
+            pupilWiseId = cleanString(pupilWiseId);
+            country = cleanString(country);
+            businessFunction = cleanString(businessFunction);
+            workGroup = cleanString(workGroup);
+
+            if (pupilWiseId == null || country == null || businessFunction == null) {
+                LOGGER.warning("Invalid input: Missing required parameters.");
+                return Collections.emptyList();
+            }
+
+            // Define applicable business functions
+            List<String> businessFunctions = getMappedBusinessFunctions(businessFunction);
+
+            // **Step 1: Check Master Table for Generic Email ID**
+            try {
+                String genericEmails = entityManager.createQuery(
+                        "SELECT LOWER(TRIM(m.genericEmailId)) FROM MasterTable m " +
+                                "WHERE LOWER(TRIM(m.pupilWiseId)) = :pupilWiseId " +
+                                "AND LOWER(TRIM(m.country)) = :country " +
+                                "AND LOWER(TRIM(m.businessFunction)) IN :businessFunctions",
+                        String.class)
+                        .setParameter("pupilWiseId", pupilWiseId)
+                        .setParameter("country", country)
+                        .setParameter("businessFunctions", businessFunctions)
+                        .setMaxResults(1)
+                        .getSingleResult();
+
+                if (genericEmails != null && !genericEmails.isBlank()) {
+                    return splitAndCleanEmails(genericEmails); // ✅ Return parsed list
+                }
+            } catch (NoResultException e) {
+                // No data found, continue to EmailTeamInfoTable
+            }
+
+            // **Step 2: Fetch multiple email columns from EmailTeamInfoTable**
+            StringBuilder query = new StringBuilder(
+                    "SELECT LOWER(TRIM(e.emailId)), LOWER(TRIM(e.additionalEmailId)) FROM EmailTeamInfoTable e " +
+                            "WHERE LOWER(TRIM(e.country)) = :country " +
+                            "AND LOWER(TRIM(e.businessFunction)) IN :businessFunctions ");
+
+            // Apply team filter only if WorkGroup is 'A'
+            if ("a".equals(workGroup)) {
+                query.append("AND LOWER(TRIM(e.team)) = 'abc'");
+            }
+
+            try {
+                List<Object[]> results = entityManager.createQuery(query.toString(), Object[].class)
+                        .setParameter("country", country)
+                        .setParameter("businessFunctions", businessFunctions)
+                        .getResultList();
+
+                List<String> emailList = new ArrayList<>();
+                for (Object[] row : results) {
+                    if (row[0] != null) emailList.addAll(splitAndCleanEmails(row[0].toString()));
+                    if (row[1] != null) emailList.addAll(splitAndCleanEmails(row[1].toString()));
+                }
+
+                return emailList; // ✅ Return list of emails
+
+            } catch (NoResultException e) {
+                return Collections.emptyList(); // No emails found
+            }
+
+        } catch (Exception e) {
+            LOGGER.severe("Error fetching email: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Maps business functions:
+     * - "Cash" → ["Cash", "CMS"]
+     * - "CMS" → ["CMS", "Cash"]
+     * - "FMO" and "Market" both map to ["FMO", "Markets"]
+     * - Otherwise, returns the exact match.
+     *
+     * @param businessFunction Business function name.
+     * @return A list of equivalent business functions.
+     */
+    private List<String> getMappedBusinessFunctions(String businessFunction) {
+        switch (businessFunction) {
+            case "cash":
+            case "cms":
+                return List.of("cash", "cms");
+            case "fmo":
+            case "market":
+                return List.of("fmo", "markets");
+            default:
+                return List.of(businessFunction);
+        }
+    }
+
+    /**
+     * Cleans a string:
+     * - Trims leading and trailing whitespace.
+     * - Converts to lowercase.
+     * - Returns null if empty or null.
+     *
+     * @param value The input string.
+     * @return The cleaned string or null.
+     */
+    private String cleanString(String value) {
+        return (value == null || value.trim().isEmpty()) ? null : value.trim().toLowerCase();
+    }
+
+    /**
+     * Splits a comma-separated email string into a list.
+     * - Removes whitespace & converts to lowercase.
+     * - Filters out empty or invalid values.
+     *
+     * @param emailString Comma-separated email IDs.
+     * @return List of valid email IDs.
+     */
+    private List<String> splitAndCleanEmails(String emailString) {
+        return Arrays.stream(emailString.split(","))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(email -> !email.isEmpty())
+                .collect(Collectors.toList());
     }
 }
 
