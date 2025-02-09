@@ -871,4 +871,17 @@ public class EmailRepository {
             // **
 
 
+String sql = "SELECT LOWER(TRIM(genericEmailId)) FROM master_table " +
+             "WHERE LOWER(TRIM(pupilWiseId)) = ?1 " +
+             "AND LOWER(TRIM(country)) = ?2 " +
+             "AND LOWER(TRIM(businessFunction)) IN (?3) LIMIT 1";
+
+Optional<String> genericEmailsOpt = entityManager.createNativeQuery(sql, String.class)
+        .setParameter(1, pupilWiseId)
+        .setParameter(2, country)
+        .setParameter(3, businessFunctions)
+        .getResultList()
+        .stream()
+        .findFirst();  // Convert to Optional
+
 
