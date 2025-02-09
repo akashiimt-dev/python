@@ -857,4 +857,18 @@ public class EmailRepository {
                     .firstResultOptional();
 
 
+// **Step 1: Check Master Table for Generic Email ID**
+            Optional<String> genericEmailsOpt = MasterTable.find(
+                    "LOWER(TRIM(pupilWiseId)) = ?1 AND LOWER(TRIM(country)) = ?2 AND LOWER(TRIM(businessFunction)) IN ?3",
+                    pupilWiseId, country, businessFunctions)
+                    .project(String.class, "LOWER(TRIM(genericEmailId))")
+                    .firstResultOptional();
+
+            if (genericEmailsOpt.isPresent() && !genericEmailsOpt.get().isBlank()) {
+                return splitSortAndCleanEmails(genericEmailsOpt.get()); // ✅ Return parsed list
+            }
+
+            // **
+
+
 
