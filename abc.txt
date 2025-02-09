@@ -410,3 +410,104 @@ function getCountryDetails(countryCode) {
 // Example usage for Tanzania (TZ)
 console.log(getCountryDetails("TZ"));
 
+
+
+------
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.logging.Logger;
+
+@ApplicationScoped
+public class EmailRepository {
+
+    @Inject
+    EntityManager entityManager;
+
+    private static final Logger LOGGER = Logger.getLogger(EmailRepository.class.getName());
+
+    /**
+     * Retrieves an email ID based on given parameters.
+     * - Converts inputs to lowercase and trims whitespace.
+     * - Fetches email from MasterTable first; if not found, fetch from EmailTeamInfoTable.
+     * - Handles exceptions to ensure smooth execution.
+     *
+     * @param pupilWiseId     Unique identifier (trimmed & lowercased).
+     * @param country         Country code (trimmed & lowercased).
+     * @param businessFunction Business function (trimmed & lowercased).
+     * @param workGroup       Workgroup (trimmed & lowercased).
+     * @return The email ID if found, otherwise null.
+     */
+    @Transactional
+    public String getEmail(String pupilWiseId, String country, String businessFunction, String workGroup) {
+        try {
+            // Convert inputs to lowercase & trim to avoid mismatches
+            pupilWiseId = pupilWiseId == null ? null : pupilWiseId.trim().toLowerCase();
+            country = country == null ? null : country.trim().toLowerCase();
+            businessFunction = businessFunction == null ? null : businessFunction.trim().toLowerCase();
+            workGroup = workGroup == null ? null : workGroup.trim().toLowerCase();
+
+            if (pupilWiseId == null || country == null || businessFunction == null) {
+                LOGGER.warning("Invalid input: Missing required parameters.");
+                return null;
+            }
+
+            // Define applicable business functions (Cash includes both Cash & CMS)
+            List<String> businessFunctions = ("cash".equals(businessFunction) || "cms".equals(businessFunction))
+                    ? List.of("cash", "cms")
+                    : List.of(businessFunction);
+
+            // **Step 1: Check MasterTable for Generic Email ID**
+            try {
+                String genericEmail = entityManager.createQuery(
+                        "SELECT LOWER(TRIM(m.genericEmailId)) FROM MasterTable m " +
+                                "WHERE LOWER(TRIM(m.pupilWiseId)) = :pupilWiseId " +
+                                "AND LOWER(TRIM(m.country)) = :country " +
+                                "AND LOWER(TRIM(m.businessFunction)) IN :businessFunctions",
+                        String.class)
+                        .setParameter("pupilWiseId", pupilWiseId)
+                        .setParameter("country", country)
+                        .setParameter("businessFunctions", businessFunctions)
+                        .setMaxResults(1)
+                        .getSingleResult();
+
+                if (genericEmail != null) {
+                    return genericEmail; // ✅ Return if found
+                }
+            } catch (NoResultException e) {
+                // No data found, continue to EmailTeamInfoTable
+            }
+
+            // **Step 2: Fetch from EmailTeamInfoTable as fallback**
+            StringBuilder query = new StringBuilder(
+                    "SELECT LOWER(TRIM(e.emailId)) FROM EmailTeamInfoTable e " +
+                            "WHERE LOWER(TRIM(e.country)) = :country " +
+                            "AND LOWER(TRIM(e.businessFunction)) IN :businessFunctions ");
+
+            // Apply team filter only if WorkGroup is 'A'
+            if ("a".equals(workGroup)) {
+                query.append("AND LOWER(TRIM(e.team)) = 'abc'");
+            }
+
+            try {
+                return entityManager.createQuery(query.toString(), String.class)
+                        .setParameter("country", country)
+                        .setParameter("businessFunctions", businessFunctions)
+                        .setMaxResults(1)
+                        .getSingleResult();
+            } catch (NoResultException e) {
+                return null; // No email found
+            }
+
+        } catch (Exception e) {
+            LOGGER.severe("Error fetching email: " + e.getMessage());
+            return null;
+        }
+    }
+}
+
+
