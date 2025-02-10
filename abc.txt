@@ -884,4 +884,31 @@ Optional<String> genericEmailsOpt = entityManager.createNativeQuery(sql, String.
         .stream()
         .findFirst();  // Convert to Optional
 
+WITH RECURSIVE TeamHierarchy AS (
+    -- Base Case: Select rows where team_name = 'skill1'
+    SELECT 
+        team_name, 
+        CASE 
+            WHEN team_type = 'team' THEN work_basket 
+            ELSE team_access 
+        END AS selected_value,
+        team_type
+    FROM team_configuration
+    WHERE team_name = 'skill1'
+    
+    UNION ALL
 
+    -- Recursive Case: Find new teams from team_access
+    SELECT 
+        tc.team_name, 
+        CASE 
+            WHEN tc.team_type = 'team' THEN tc.work_basket 
+            ELSE tc.team_access 
+        END AS selected_value,
+        tc.team_type
+    FROM team_configuration tc
+    INNER JOIN TeamHierarchy th ON tc.team_name = th.selected_value
+    WHERE tc.team_type = 'group'
+)
+
+SELECT team_name, selected_value FROM TeamHierarchy;
