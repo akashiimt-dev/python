@@ -912,3 +912,30 @@ WITH RECURSIVE TeamHierarchy AS (
 )
 
 SELECT team_name, selected_value FROM TeamHierarchy;
+
+
+WITH RECURSIVE TeamHierarchy AS (
+    -- Base Case: Select rows where team_name = 'skill1'
+    SELECT 
+        team_name, 
+        work_basket AS selected_value
+    FROM team_configuration
+    WHERE team_name = 'skill1' AND team_type = 'team'
+    
+    UNION ALL
+
+    -- Recursive Case: Expand groups and continue filtering
+    SELECT 
+        tc.team_name, 
+        tc.work_basket
+    FROM team_configuration tc
+    INNER JOIN (
+        -- Expand comma-separated team_access values into individual rows
+        SELECT DISTINCT TRIM(value) AS team_name
+        FROM TeamHierarchy
+        JOIN LATERAL STRING_SPLIT(selected_value, ',') ON TRUE  -- Adjust for your DBMS
+    ) expanded ON tc.team_name = expanded.team_name
+    WHERE tc.team_type = 'team'
+)
+
+SELECT team_name, selected_value FROM TeamHierarchy;
