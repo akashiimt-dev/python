@@ -939,3 +939,41 @@ WITH RECURSIVE TeamHierarchy AS (
 )
 
 SELECT team_name, selected_value FROM TeamHierarchy;
+
+-- SQL Script to Retrieve Generic IT based on MCA or Email TeamInfo
+
+-- Parameters:
+-- :bf       => Business Function
+-- :country  => Country
+-- :branch   => Branch
+-- :teams    => Teams (applicable if profile is Cache, L2, or L1)
+-- :profile  => Profile (e.g., 'Cache', 'L2', 'L1', or others)
+
+WITH MCA_Result AS (
+    SELECT generic_it, 1 AS priority
+    FROM mca_table
+    WHERE business_function = :bf
+      -- For FMO, do not apply the country filter; for others, apply it
+      AND ((:bf = 'FMO') OR (country = :country))
+),
+Email_Result AS (
+    SELECT generic_it, 2 AS priority
+    FROM email_team_info
+    WHERE country = :country
+      AND business_function = :bf
+      AND branch = :branch
+      -- Apply team filter only if profile is Cache, L2, or L1; else, skip team filter.
+      AND (
+            ( :profile IN ('Cache', 'L2', 'L1') AND teams = :teams )
+         OR ( :profile NOT IN ('Cache', 'L2', 'L1') )
+      )
+)
+SELECT generic_it
+FROM (
+    SELECT generic_it, priority FROM MCA_Result
+    UNION ALL
+    SELECT generic_it, priority FROM Email_Result
+) AS Results
+ORDER BY priority
+LIMIT 1;
+
