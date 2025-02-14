@@ -977,3 +977,24 @@ FROM (
 ORDER BY priority
 LIMIT 1;
 
+// Fetch the country name using Intl.DisplayNames API
+let countryName = new Intl.DisplayNames(['en'], { type: 'region' }).of(countryCode);
+
+// Handle specific exceptions where the default name is too long or includes unnecessary details
+const exceptions = {
+    "HK": "Hong Kong",  // Default: "Hong Kong SAR"
+    "MO": "Macau",  // Default: "Macau SAR"
+    "TW": "Taiwan",  // Default: "Taiwan, Province of China"
+    "US": "United States",  // Default: "United States of America"
+    "GB": "United Kingdom",  // Default: "United Kingdom of Great Britain and Northern Ireland"
+    "VA": "Vatican City"  // Default: "Holy See"
+};
+
+// If the countryCode exists in the exceptions list, replace it with the corrected name
+if (exceptions[countryCode]) {
+    countryName = exceptions[countryCode];
+}
+
+// Return the corrected country name
+return countryName;
+
