@@ -1,1062 +1,223 @@
-Ko ni mbnd contributing to our continued success
-
-
-function getAllCountryDetailsSorted() {
-  try {
-    // Predefined list of all ISO 3166-1 alpha-2 country codes
-    const countryCodes = [
-      "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ",
-      "BS", "BH", "BD", "BB", "BY", "BE", "BZ", "BJ", "BM", "BT", "BO", "BA", "BW", "BV", "BR",
-      "IO", "BN", "BG", "BF", "BI", "KH", "CM", "CA", "CV", "KY", "CF", "TD", "CL", "CN", "CX",
-      "CC", "CO", "KM", "CG", "CD", "CK", "CR", "HR", "CU", "CY", "CZ", "DK", "DJ", "DM", "DO",
-      "EC", "EG", "SV", "GQ", "ER", "EE", "ET", "FK", "FO", "FJ", "FI", "FR", "GF", "PF", "TF",
-      "GA", "GM", "GE", "DE", "GH", "GI", "GR", "GL", "GD", "GP", "GU", "GT", "GG", "GN", "GW",
-      "GY", "HT", "HM", "VA", "HN", "HK", "HU", "IS", "IN", "ID", "IR", "IQ", "IE", "IM", "IL",
-      "IT", "JM", "JP", "JE", "JO", "KZ", "KE", "KI", "KP", "KR", "KW", "KG", "LA", "LV", "LB",
-      "LS", "LR", "LY", "LI", "LT", "LU", "MO", "MG", "MW", "MY", "MV", "ML", "MT", "MH", "MQ",
-      "MR", "MU", "YT", "MX", "FM", "MD", "MC", "MN", "ME", "MS", "MA", "MZ", "MM", "NA", "NR",
-      "NP", "NL", "NC", "NZ", "NI", "NE", "NG", "NU", "NF", "MP", "NO", "OM", "PK", "PW", "PS",
-      "PA", "PG", "PY", "PE", "PH", "PN", "PL", "PT", "PR", "QA", "RE", "RO", "RU", "RW", "BL",
-      "SH", "KN", "LC", "MF", "PM", "VC", "WS", "SM", "ST", "SA", "SN", "RS", "SC", "SL", "SG",
-      "SX", "SK", "SI", "SB", "SO", "ZA", "GS", "SS", "ES", "LK", "SD", "SR", "SJ", "SE", "CH",
-      "SY", "TW", "TJ", "TZ", "TH", "TL", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV",
-      "UG", "UA", "AE", "GB", "US", "UM", "UY", "UZ", "VU", "VE", "VN", "VG", "VI", "WF", "EH",
-      "YE", "ZM", "ZW"
-    ];
-
-    // Timezone mapping for some countries (default to UTC for others)
-    const timeZoneMap = {
-      TZ: "Africa/Dar_es_Salaam",
-      US: "America/New_York",
-      AE: "Asia/Dubai",
-      IN: "Asia/Kolkata",
-      UK: "Europe/London",
-      LB: "Asia/Beirut",
-      CM: "Africa/Douala",
-    };
-
-    const countryDetails = [];
-
-    // Loop through all country codes
-    countryCodes.forEach((countryCode) => {
-      // Construct locale
-      const locale = `en-${countryCode}`;
-      
-      // Fetch timezone from map or default to 'UTC'
-      const timezone = timeZoneMap[countryCode] || "UTC";
-      
-      // Fetch country name using Intl.DisplayNames
-      const countryName = new Intl.DisplayNames(["en"], { type: "region" }).of(countryCode);
-
-      // Build details object
-      countryDetails.push({
-        countryCode: countryCode,
-        timezone: timezone,
-        locale: locale,
-        countryName: countryName,
-      });
-    });
-
-    // Sort the details by country name
-    countryDetails.sort((a, b) => a.countryName.localeCompare(b.countryName));
-
-    return countryDetails;
-  } catch (error) {
-    console.error("Error fetching country details:", error);
-    return [];
-  }
-}
-
-// Example usage: Get all sorted country details
-const sortedCountryDetails = getAllCountryDetailsSorted();
-
-// Display sorted country details
-console.log(sortedCountryDetails);
-
-function getAllCountryDetailsSorted() {
-  try {
-    // Predefined list of all ISO 3166-1 alpha-2 country codes
-    const countryCodes = [
-      "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ",
-      "BS", "BH", "BD", "BB", "BY", "BE", "BZ", "BJ", "BM", "BT", "BO", "BA", "BW", "BV", "BR",
-      "IO", "BN", "BG", "BF", "BI", "KH", "CM", "CA", "CV", "KY", "CF", "TD", "CL", "CN", "CX",
-      "CC", "CO", "KM", "CG", "CD", "CK", "CR", "HR", "CU", "CY", "CZ", "DK", "DJ", "DM", "DO",
-      "EC", "EG", "SV", "GQ", "ER", "EE", "ET", "FK", "FO", "FJ", "FI", "FR", "GF", "PF", "TF",
-      "GA", "GM", "GE", "DE", "GH", "GI", "GR", "GL", "GD", "GP", "GU", "GT", "GG", "GN", "GW",
-      "GY", "HT", "HM", "VA", "HN", "HK", "HU", "IS", "IN", "ID", "IR", "IQ", "IE", "IM", "IL",
-      "IT", "JM", "JP", "JE", "JO", "KZ", "KE", "KI", "KP", "KR", "KW", "KG", "LA", "LV", "LB",
-      "LS", "LR", "LY", "LI", "LT", "LU", "MO", "MG", "MW", "MY", "MV", "ML", "MT", "MH", "MQ",
-      "MR", "MU", "YT", "MX", "FM", "MD", "MC", "MN", "ME", "MS", "MA", "MZ", "MM", "NA", "NR",
-      "NP", "NL", "NC", "NZ", "NI", "NE", "NG", "NU", "NF", "MP", "NO", "OM", "PK", "PW", "PS",
-      "PA", "PG", "PY", "PE", "PH", "PN", "PL", "PT", "PR", "QA", "RE", "RO", "RU", "RW", "BL",
-      "SH", "KN", "LC", "MF", "PM", "VC", "WS", "SM", "ST", "SA", "SN", "RS", "SC", "SL", "SG",
-      "SX", "SK", "SI", "SB", "SO", "ZA", "GS", "SS", "ES", "LK", "SD", "SR", "SJ", "SE", "CH",
-      "SY", "TW", "TJ", "TZ", "TH", "TL", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV",
-      "UG", "UA", "AE", "GB", "US", "UM", "UY", "UZ", "VU", "VE", "VN", "VG", "VI", "WF", "EH",
-      "YE", "ZM", "ZW"
-    ];
-
-    // Timezone mapping for some countries (default to UTC for others)
-    const timeZoneMap = {
-      TZ: "Africa/Dar_es_Salaam",
-      US: "America/New_York",
-      AE: "Asia/Dubai",
-      IN: "Asia/Kolkata",
-      UK: "Europe/London",
-      LB: "Asia/Beirut",
-      CM: "Africa/Douala",
-    };
-
-    const countryDetails = {};
-
-    // Loop through all country codes
-    countryCodes.forEach((countryCode) => {
-      // Construct locale
-      const locale = `en-${countryCode}`;
-      
-      // Fetch timezone from map or default to 'UTC'
-      const timezone = timeZoneMap[countryCode] || "UTC";
-      
-      // Fetch country name using Intl.DisplayNames
-      const countryName = new Intl.DisplayNames(["en"], { type: "region" }).of(countryCode);
-
-      // Add country details in the required format
-      countryDetails[countryCode] = {
-        timezone: timezone,
-        locale: locale,
-        countryName: countryName,
-      };
-    });
-
-    // Convert the object to a string and log it for viewing
-    console.log(JSON.stringify(countryDetails, null, 2)
-      .replace(/"([A-Z]{2})":/g, '$1:')
-      .replace(/"timezone"/g, 'timezone')
-      .replace(/"locale"/g, 'locale')
-      .replace(/"countryName"/g, 'countryName'));
-
-  } catch (error) {
-    console.error("Error fetching country details:", error);
-  }
-}
-
-// Example usage
-getAllCountryDetailsSorted();
-function getAllCountryDetailsSorted() {
-  try {
-    // Full country code to timezone mapping
-    const timeZoneMap = {
-      AF: "Asia/Kabul",
-      AL: "Europe/Tirane",
-      DZ: "Africa/Algiers",
-      AS: "Pacific/Pago_Pago",
-      AD: "Europe/Andorra",
-      AO: "Africa/Luanda",
-      AI: "America/Anguilla",
-      AQ: "Antarctica/South_Pole",
-      AG: "America/Antigua",
-      AR: "America/Argentina/Buenos_Aires",
-      AM: "Asia/Yerevan",
-      AW: "America/Aruba",
-      AU: "Australia/Sydney",
-      AT: "Europe/Vienna",
-      AZ: "Asia/Baku",
-      BS: "America/Nassau",
-      BH: "Asia/Bahrain",
-      BD: "Asia/Dhaka",
-      BB: "America/Barbados",
-      BY: "Europe/Minsk",
-      BE: "Europe/Brussels",
-      BZ: "America/Belize",
-      BJ: "Africa/Porto-Novo",
-      BM: "Atlantic/Bermuda",
-      BT: "Asia/Thimphu",
-      BO: "America/La_Paz",
-      BA: "Europe/Sarajevo",
-      BW: "Africa/Gaborone",
-      BR: "America/Sao_Paulo",
-      IO: "Indian/Chagos",
-      BN: "Asia/Brunei",
-      BG: "Europe/Sofia",
-      BF: "Africa/Ouagadougou",
-      BI: "Africa/Bujumbura",
-      KH: "Asia/Phnom_Penh",
-      CM: "Africa/Douala",
-      CA: "America/Toronto",
-      CV: "Atlantic/Cape_Verde",
-      KY: "America/Cayman",
-      CF: "Africa/Bangui",
-      TD: "Africa/Ndjamena",
-      CL: "America/Santiago",
-      CN: "Asia/Shanghai",
-      CX: "Indian/Christmas",
-      CC: "Indian/Cocos",
-      CO: "America/Bogota",
-      KM: "Indian/Comoro",
-      CG: "Africa/Brazzaville",
-      CD: "Africa/Kinshasa",
-      CK: "Pacific/Rarotonga",
-      CR: "America/Costa_Rica",
-      HR: "Europe/Zagreb",
-      CU: "America/Havana",
-      CY: "Asia/Nicosia",
-      CZ: "Europe/Prague",
-      DK: "Europe/Copenhagen",
-      DJ: "Africa/Djibouti",
-      DM: "America/Dominica",
-      DO: "America/Santo_Domingo",
-      EC: "America/Guayaquil",
-      EG: "Africa/Cairo",
-      SV: "America/El_Salvador",
-      GQ: "Africa/Malabo",
-      ER: "Africa/Asmara",
-      EE: "Europe/Tallinn",
-      ET: "Africa/Addis_Ababa",
-      FK: "Atlantic/Stanley",
-      FO: "Atlantic/Faroe",
-      FJ: "Pacific/Fiji",
-      FI: "Europe/Helsinki",
-      FR: "Europe/Paris",
-      GA: "Africa/Libreville",
-      GM: "Africa/Banjul",
-      GE: "Asia/Tbilisi",
-      DE: "Europe/Berlin",
-      GH: "Africa/Accra",
-      GI: "Europe/Gibraltar",
-      GR: "Europe/Athens",
-      GL: "America/Godthab",
-      GD: "America/Grenada",
-      GP: "America/Guadeloupe",
-      GU: "Pacific/Guam",
-      GT: "America/Guatemala",
-      GN: "Africa/Conakry",
-      GW: "Africa/Bissau",
-      GY: "America/Guyana",
-      HT: "America/Port-au-Prince",
-      HN: "America/Tegucigalpa",
-      HK: "Asia/Hong_Kong",
-      HU: "Europe/Budapest",
-      IS: "Atlantic/Reykjavik",
-      IN: "Asia/Kolkata",
-      ID: "Asia/Jakarta",
-      IR: "Asia/Tehran",
-      IQ: "Asia/Baghdad",
-      IE: "Europe/Dublin",
-      IL: "Asia/Jerusalem",
-      IT: "Europe/Rome",
-      JM: "America/Jamaica",
-      JP: "Asia/Tokyo",
-      JO: "Asia/Amman",
-      KZ: "Asia/Almaty",
-      KE: "Africa/Nairobi",
-      KR: "Asia/Seoul",
-      KW: "Asia/Kuwait",
-      KG: "Asia/Bishkek",
-      LA: "Asia/Vientiane",
-      LV: "Europe/Riga",
-      LB: "Asia/Beirut",
-      LS: "Africa/Maseru",
-      LR: "Africa/Monrovia",
-      LY: "Africa/Tripoli",
-      LT: "Europe/Vilnius",
-      LU: "Europe/Luxembourg",
-      MO: "Asia/Macau",
-      MG: "Indian/Antananarivo",
-      MW: "Africa/Blantyre",
-      MY: "Asia/Kuala_Lumpur",
-      MV: "Indian/Maldives",
-      ML: "Africa/Bamako",
-      MT: "Europe/Malta",
-      MH: "Pacific/Majuro",
-      MQ: "America/Martinique",
-      MR: "Africa/Nouakchott",
-      MU: "Indian/Mauritius",
-      YT: "Indian/Mayotte",
-      MX: "America/Mexico_City",
-      FM: "Pacific/Pohnpei",
-      MD: "Europe/Chisinau",
-      MC: "Europe/Monaco",
-      MN: "Asia/Ulaanbaatar",
-      ME: "Europe/Podgorica",
-      MS: "America/Montserrat",
-      MA: "Africa/Casablanca",
-      MZ: "Africa/Maputo",
-      MM: "Asia/Yangon",
-      NA: "Africa/Windhoek",
-      NR: "Pacific/Nauru",
-      NP: "Asia/Kathmandu",
-      NL: "Europe/Amsterdam",
-      NC: "Pacific/Noumea",
-      NZ: "Pacific/Auckland",
-      NI: "America/Managua",
-      NE: "Africa/Niamey",
-      NG: "Africa/Lagos",
-      NU: "Pacific/Niue",
-      NF: "Pacific/Norfolk",
-      MP: "Pacific/Saipan",
-      NO: "Europe/Oslo",
-      OM: "Asia/Muscat",
-      PK: "Asia/Karachi",
-      PW: "Pacific/Palau",
-      PS: "Asia/Gaza",
-      PA: "America/Panama",
-      PG: "Pacific/Port_Moresby",
-      PY: "America/Asuncion",
-      PE: "America/Lima",
-      PH: "Asia/Manila",
-      PL: "Europe/Warsaw",
-      PT: "Europe/Lisbon",
-      PR: "America/Puerto_Rico",
-      QA: "Asia/Qatar",
-      RO: "Europe/Bucharest",
-      RU: "Europe/Moscow",
-      RW: "Africa/Kigali",
-      WS: "Pacific/Apia",
-      SM: "Europe/San_Marino",
-      ST: "Africa/Sao_Tome",
-      SA: "Asia/Riyadh",
-      SN: "Africa/Dakar",
-      RS: "Europe/Belgrade",
-      SC: "Indian/Mahe",
-      SL: "Africa/Freetown",
-      SG: "Asia/Singapore",
-      SK: "Europe/Bratislava",
-      SI: "Europe/Ljubljana",
-      SB: "Pacific/Guadalcanal",
-      SO: "Africa/Mogadishu",
-      ZA: "Africa/Johannesburg",
-      ES: "Europe/Madrid",
-      LK: "Asia/Colombo",
-      SD: "Africa/Khartoum",
-      SR: "America/Paramaribo",
-      SE: "Europe/Stockholm",
-      CH: "Europe/Zurich",
-      SY: "Asia/Damascus",
-      TW: "Asia/Taipei",
-      TJ: "Asia/Dushanbe",
-      TZ: "Africa/Dar_es_Salaam",
-      TH: "Asia/Bangkok",
-      TL: "Asia/Dili",
-      TG: "Africa/Lome",
-      TO: "Pacific/Tongatapu",
-      TT: "America/Port_of_Spain",
-      TN: "Africa/Tunis",
-      TR: "Europe/Istanbul",
-      TM: "Asia/Ashgabat",
-      TC: "America/Grand_Turk",
-      TV: "Pacific/Funafuti",
-      UG: "Africa/Kampala",
-      UA: "Europe/Kiev",
-      AE: "Asia/Dubai",
-      GB: "Europe/London",
-      US: "America/New_York",
-      UY: "America/Montevideo",
-      UZ: "Asia/Tashkent",
-      VU: "Pacific/Efate",
-      VE: "America/Caracas",
-      VN: "Asia/Ho_Chi_Minh",
-      VG: "America/Tortola",
-      WF: "Pacific/Wallis",
-      YE: "Asia/Aden",
-      ZM: "Africa/Lusaka",
-      ZW: "Africa/Harare",
-    };
-
-    return timeZoneMap;
-  } catch {}.
-
-You can use the comprehensive timezone map provided in the code snippet above for fetching timezones for most countries. If you're still seeing `UTC` for all entries, ensure the following:
-
-1. **Dynamic Mapping is Being Used**:
-   The provided `timeZoneMap` should be checked against the country codes dynamically. Ensure that you're passing the correct country code to fetch the associated timezone.
-
-2. **Integration in the Function**:
-   Here's how you can use this updated `timeZoneMap` in your function:
-
-```javascript
-function getCountryDetails(countryCode) {
-  try {
-    // Comprehensive timezone map
-    const timeZoneMap = {
-      AD: "Europe/Andorra",
-      AE: "Asia/Dubai",
-      AF: "Asia/Kabul",
-      // Include other entries from the full map
-      TZ: "Africa/Dar_es_Salaam",
-      US: "America/New_York",
-      IN: "Asia/Kolkata",
-    };
-
-    // Construct locale
-    const locale = `en-${countryCode}`;
-
-    // Fetch timezone from map
-    const timezone = timeZoneMap[countryCode] || "UTC"; // Default to UTC if not mapped
-
-    // Fetch country name dynamically
-    const countryName = new Intl.DisplayNames(["en"], { type: "region" }).of(countryCode);
-
-    return {
-      timezone,
-      locale,
-      countryName,
-    };
-  } catch (error) {
-    console.error("Error fetching country details:", error);
-    return null;
-  }
-}
-
-// Example usage for Tanzania (TZ)
-console.log(getCountryDetails("TZ"));
-
-
-
-------
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.logging.Logger;
-
-@ApplicationScoped
-public class EmailRepository {
-
-    @Inject
-    EntityManager entityManager;
-
-    private static final Logger LOGGER = Logger.getLogger(EmailRepository.class.getName());
-
-    /**
-     * Retrieves an email ID based on given parameters.
-     * - Converts inputs to lowercase and trims whitespace.
-     * - Fetches email from MasterTable first; if not found, fetch from EmailTeamInfoTable.
-     * - Handles exceptions to ensure smooth execution.
-     *
-     * @param pupilWiseId     Unique identifier (trimmed & lowercased).
-     * @param country         Country code (trimmed & lowercased).
-     * @param businessFunction Business function (trimmed & lowercased).
-     * @param workGroup       Workgroup (trimmed & lowercased).
-     * @return The email ID if found, otherwise null.
-     */
-    @Transactional
-    public String getEmail(String pupilWiseId, String country, String businessFunction, String workGroup) {
-        try {
-            // Convert inputs to lowercase & trim to avoid mismatches
-            pupilWiseId = pupilWiseId == null ? null : pupilWiseId.trim().toLowerCase();
-            country = country == null ? null : country.trim().toLowerCase();
-            businessFunction = businessFunction == null ? null : businessFunction.trim().toLowerCase();
-            workGroup = workGroup == null ? null : workGroup.trim().toLowerCase();
-
-            if (pupilWiseId == null || country == null || businessFunction == null) {
-                LOGGER.warning("Invalid input: Missing required parameters.");
-                return null;
-            }
-
-            // Define applicable business functions (Cash includes both Cash & CMS)
-            List<String> businessFunctions = ("cash".equals(businessFunction) || "cms".equals(businessFunction))
-                    ? List.of("cash", "cms")
-                    : List.of(businessFunction);
-
-            // **Step 1: Check MasterTable for Generic Email ID**
-            try {
-                String genericEmail = entityManager.createQuery(
-                        "SELECT LOWER(TRIM(m.genericEmailId)) FROM MasterTable m " +
-                                "WHERE LOWER(TRIM(m.pupilWiseId)) = :pupilWiseId " +
-                                "AND LOWER(TRIM(m.country)) = :country " +
-                                "AND LOWER(TRIM(m.businessFunction)) IN :businessFunctions",
-                        String.class)
-                        .setParameter("pupilWiseId", pupilWiseId)
-                        .setParameter("country", country)
-                        .setParameter("businessFunctions", businessFunctions)
-                        .setMaxResults(1)
-                        .getSingleResult();
-
-                if (genericEmail != null) {
-                    return genericEmail; // ✅ Return if found
-                }
-            } catch (NoResultException e) {
-                // No data found, continue to EmailTeamInfoTable
-            }
-
-            // **Step 2: Fetch from EmailTeamInfoTable as fallback**
-            StringBuilder query = new StringBuilder(
-                    "SELECT LOWER(TRIM(e.emailId)) FROM EmailTeamInfoTable e " +
-                            "WHERE LOWER(TRIM(e.country)) = :country " +
-                            "AND LOWER(TRIM(e.businessFunction)) IN :businessFunctions ");
-
-            // Apply team filter only if WorkGroup is 'A'
-            if ("a".equals(workGroup)) {
-                query.append("AND LOWER(TRIM(e.team)) = 'abc'");
-            }
-
-            try {
-                return entityManager.createQuery(query.toString(), String.class)
-                        .setParameter("country", country)
-                        .setParameter("businessFunctions", businessFunctions)
-                        .setMaxResults(1)
-                        .getSingleResult();
-            } catch (NoResultException e) {
-                return null; // No email found
-            }
-
-        } catch (Exception e) {
-            LOGGER.severe("Error fetching email: " + e.getMessage());
-            return null;
-        }
-    }
-}
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.transaction.Transactional;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-@ApplicationScoped
-public class EmailRepository {
-
-    @Inject
-    EntityManager entityManager;
-
-    private static final Logger LOGGER = Logger.getLogger(EmailRepository.class.getName());
-
-    /**
-     * Retrieves a list of email IDs based on given parameters.
-     * - Handles multiple email columns in EmailTeamInfoTable.
-     * - Parses comma-separated emails into a list.
-     * - Trims and lowercases all values for consistency.
-     * - Maps "FMO" and "Market" both to ["FMO", "Markets"].
-     *
-     * @param pupilWiseId      Unique identifier (trimmed & lowercased).
-     * @param country          Country code (trimmed & lowercased).
-     * @param businessFunction Business function (trimmed & lowercased).
-     * @param workGroup        Workgroup (trimmed & lowercased).
-     * @return A list of email IDs if found, otherwise an empty list.
-     */
-    @Transactional
-    public List<String> getEmailList(String pupilWiseId, String country, String businessFunction, String workGroup) {
-        try {
-            // Convert inputs to lowercase & trim to avoid mismatches
-            pupilWiseId = cleanString(pupilWiseId);
-            country = cleanString(country);
-            businessFunction = cleanString(businessFunction);
-            workGroup = cleanString(workGroup);
-
-            if (pupilWiseId == null || country == null || businessFunction == null) {
-                LOGGER.warning("Invalid input: Missing required parameters.");
-                return Collections.emptyList();
-            }
-
-            // Define applicable business functions
-            List<String> businessFunctions = getMappedBusinessFunctions(businessFunction);
-
-            // **Step 1: Check Master Table for Generic Email ID**
-            try {
-                String genericEmails = entityManager.createQuery(
-                        "SELECT LOWER(TRIM(m.genericEmailId)) FROM MasterTable m " +
-                                "WHERE LOWER(TRIM(m.pupilWiseId)) = :pupilWiseId " +
-                                "AND LOWER(TRIM(m.country)) = :country " +
-                                "AND LOWER(TRIM(m.businessFunction)) IN :businessFunctions",
-                        String.class)
-                        .setParameter("pupilWiseId", pupilWiseId)
-                        .setParameter("country", country)
-                        .setParameter("businessFunctions", businessFunctions)
-                        .setMaxResults(1)
-                        .getSingleResult();
-
-                if (genericEmails != null && !genericEmails.isBlank()) {
-                    return splitAndCleanEmails(genericEmails); // ✅ Return parsed list
-                }
-            } catch (NoResultException e) {
-                // No data found, continue to EmailTeamInfoTable
-            }
-
-            // **Step 2: Fetch multiple email columns from EmailTeamInfoTable**
-            StringBuilder query = new StringBuilder(
-                    "SELECT LOWER(TRIM(e.emailId)), LOWER(TRIM(e.additionalEmailId)) FROM EmailTeamInfoTable e " +
-                            "WHERE LOWER(TRIM(e.country)) = :country " +
-                            "AND LOWER(TRIM(e.businessFunction)) IN :businessFunctions ");
-
-            // Apply team filter only if WorkGroup is 'A'
-            if ("a".equals(workGroup)) {
-                query.append("AND LOWER(TRIM(e.team)) = 'abc'");
-            }
-
-            try {
-                List<Object[]> results = entityManager.createQuery(query.toString(), Object[].class)
-                        .setParameter("country", country)
-                        .setParameter("businessFunctions", businessFunctions)
-                        .getResultList();
-
-                List<String> emailList = new ArrayList<>();
-                for (Object[] row : results) {
-                    if (row[0] != null) emailList.addAll(splitAndCleanEmails(row[0].toString()));
-                    if (row[1] != null) emailList.addAll(splitAndCleanEmails(row[1].toString()));
-                }
-
-                return emailList; // ✅ Return list of emails
-
-            } catch (NoResultException e) {
-                return Collections.emptyList(); // No emails found
-            }
-
-        } catch (Exception e) {
-            LOGGER.severe("Error fetching email: " + e.getMessage());
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Maps business functions:
-     * - "Cash" → ["Cash", "CMS"]
-     * - "CMS" → ["CMS", "Cash"]
-     * - "FMO" and "Market" both map to ["FMO", "Markets"]
-     * - Otherwise, returns the exact match.
-     *
-     * @param businessFunction Business function name.
-     * @return A list of equivalent business functions.
-     */
-    private List<String> getMappedBusinessFunctions(String businessFunction) {
-        switch (businessFunction) {
-            case "cash":
-            case "cms":
-                return List.of("cash", "cms");
-            case "fmo":
-            case "market":
-                return List.of("fmo", "markets");
-            default:
-                return List.of(businessFunction);
-        }
-    }
-
-    /**
-     * Cleans a string:
-     * - Trims leading and trailing whitespace.
-     * - Converts to lowercase.
-     * - Returns null if empty or null.
-     *
-     * @param value The input string.
-     * @return The cleaned string or null.
-     */
-    private String cleanString(String value) {
-        return (value == null || value.trim().isEmpty()) ? null : value.trim().toLowerCase();
-    }
-
-    /**
-     * Splits a comma-separated email string into a list.
-     * - Removes whitespace & converts to lowercase.
-     * - Filters out empty or invalid values.
-     *
-     * @param emailString Comma-separated email IDs.
-     * @return List of valid email IDs.
-     */
-    private List<String> splitAndCleanEmails(String emailString) {
-        return Arrays.stream(emailString.split(","))
-                .map(String::trim)
-                .map(String::toLowerCase)
-                .filter(email -> !email.isEmpty())
-                .collect(Collectors.toList());
-    }
-}
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.transaction.Transactional;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-@ApplicationScoped
-public class EmailRepository {
-
-    @Inject
-    EntityManager entityManager;
-
-    private static final Logger LOGGER = Logger.getLogger(EmailRepository.class.getName());
-
-    /**
-     * Retrieves a sorted and distinct list of email IDs based on given parameters.
-     * - Filters `EmailTeamInfoTable` based on workgroup-specific team rules.
-     * - Handles multiple rows with comma-separated email parsing.
-     * - Ensures results are **distinct and sorted** alphabetically.
-     *
-     * @param pupilWiseId      Unique identifier (trimmed & lowercased).
-     * @param country          Country code (trimmed & lowercased).
-     * @param businessFunction Business function (trimmed & lowercased).
-     * @param workGroup        Workgroup (trimmed & lowercased).
-     * @return A **sorted, distinct** list of email IDs.
-     */
-    @Transactional
-    public List<String> getEmailList(String pupilWiseId, String country, String businessFunction, String workGroup) {
-        try {
-            // Convert inputs to lowercase & trim to avoid mismatches
-            pupilWiseId = cleanString(pupilWiseId);
-            country = cleanString(country);
-            businessFunction = cleanString(businessFunction);
-            workGroup = cleanString(workGroup);
-
-            if (pupilWiseId == null || country == null || businessFunction == null) {
-                LOGGER.warning("Invalid input: Missing required parameters.");
-                return Collections.emptyList();
-            }
-
-            // Define applicable business functions
-            List<String> businessFunctions = getMappedBusinessFunctions(businessFunction);
-
-            // **Step 1: Check Master Table for Generic Email ID**
-            try {
-                String genericEmails = entityManager.createQuery(
-                        "SELECT LOWER(TRIM(m.genericEmailId)) FROM MasterTable m " +
-                                "WHERE LOWER(TRIM(m.pupilWiseId)) = :pupilWiseId " +
-                                "AND LOWER(TRIM(m.country)) = :country " +
-                                "AND LOWER(TRIM(m.businessFunction)) IN :businessFunctions",
-                        String.class)
-                        .setParameter("pupilWiseId", pupilWiseId)
-                        .setParameter("country", country)
-                        .setParameter("businessFunctions", businessFunctions)
-                        .setMaxResults(1)
-                        .getSingleResult();
-
-                if (genericEmails != null && !genericEmails.isBlank()) {
-                    return splitSortAndCleanEmails(genericEmails); // ✅ Return parsed list
-                }
-            } catch (NoResultException e) {
-                // No data found, continue to EmailTeamInfoTable
-            }
-
-            // **Step 2: Fetch multiple rows from EmailTeamInfoTable**
-            StringBuilder query = new StringBuilder(
-                    "SELECT LOWER(TRIM(e.emailId)) FROM EmailTeamInfoTable e " +
-                            "WHERE LOWER(TRIM(e.country)) = :country " +
-                            "AND LOWER(TRIM(e.businessFunction)) IN :businessFunctions ");
-
-            // Apply workgroup-specific team filter
-            String teamFilter = getTeamFilter(businessFunctions, workGroup);
-            if (teamFilter != null) {
-                query.append("AND LOWER(TRIM(e.team)) = :teamFilter ");
-            }
-
-            try {
-                var q = entityManager.createQuery(query.toString(), String.class)
-                        .setParameter("country", country)
-                        .setParameter("businessFunctions", businessFunctions);
-
-                if (teamFilter != null) {
-                    q.setParameter("teamFilter", teamFilter);
-                }
-
-                List<String> emailList = q.getResultList();
-
-                return emailList.stream()
-                        .flatMap(email -> splitSortAndCleanEmails(email).stream()) // ✅ Clean, Split & Sort
-                        .distinct() // ✅ Ensure Unique Emails
-                        .sorted()   // ✅ Sort Alphabetically
-                        .collect(Collectors.toList());
-
-            } catch (NoResultException e) {
-                return Collections.emptyList(); // No emails found
-            }
-
-        } catch (Exception e) {
-            LOGGER.severe("Error fetching email: " + e.getMessage());
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Maps business functions:
-     * - "Cash" → ["Cash", "CMS"]
-     * - "CMS" → ["CMS", "Cash"]
-     * - "FMO" and "Market" both map to ["FMO", "Markets"]
-     * - Otherwise, returns the exact match.
-     *
-     * @param businessFunction Business function name.
-     * @return A list of equivalent business functions.
-     */
-    private List<String> getMappedBusinessFunctions(String businessFunction) {
-        switch (businessFunction) {
-            case "cash":
-            case "cms":
-                return List.of("cash", "cms");
-            case "fmo":
-            case "market":
-                return List.of("fmo", "markets");
-            default:
-                return List.of(businessFunction);
-        }
-    }
-
-    /**
-     * Determines the team filter based on business function and workgroup.
-     * - If BusinessFunction contains ["Cash", "CMS"] and WorkGroup is "cash_client" → Apply Team "A"
-     * - If BusinessFunction contains ["Cash", "CMS"] and WorkGroup is "cash2" → Apply Team "B"
-     * - Otherwise, no team filter applied.
-     *
-     * @param businessFunctions List of business functions.
-     * @param workGroup         Workgroup name.
-     * @return The team filter value or null if no filter.
-     */
-    private String getTeamFilter(List<String> businessFunctions, String workGroup) {
-        if (businessFunctions.contains("cash") && businessFunctions.contains("cms")) {
-            if ("cash_client".equals(workGroup)) {
-                return "a";
-            } else if ("cash2".equals(workGroup)) {
-                return "b";
-            }
-        }
-        return null; // No team filter applied
-    }
-
-    /**
-     * Cleans a string:
-     * - Trims leading and trailing whitespace.
-     * - Converts to lowercase.
-     * - Returns null if empty or null.
-     *
-     * @param value The input string.
-     * @return The cleaned string or null.
-     */
-    private String cleanString(String value) {
-        return (value == null || value.trim().isEmpty()) ? null : value.trim().toLowerCase();
-    }
-
-    /**
-     * Splits a comma-separated email string into a distinct, sorted list.
-     * - Removes whitespace & converts to lowercase.
-     * - Filters out empty or invalid values.
-     * - Returns a **sorted and distinct** list.
-     *
-     * @param emailString Comma-separated email IDs.
-     * @return A **sorted, distinct** list of valid email IDs.
-     */
-    private List<String> splitSortAndCleanEmails(String emailString) {
-        return Arrays.stream(emailString.split(","))
-                .map(String::trim)
-                .map(String::toLowerCase)
-                .filter(email -> !email.isEmpty())
-                .distinct() // ✅ Ensure Unique Emails
-                .sorted()   // ✅ Sort Alphabetically
-                .collect(Collectors.toList());
-    }
-}
-
-// **Step 1: Check Master Table for Generic Email ID**
-            Optional<String> genericEmailsOpt = MasterTable.find(
-                    "LOWER(TRIM(pupilWiseId)) = ?1 AND LOWER(TRIM(country)) = ?2 AND LOWER(TRIM(businessFunction)) IN ?3",
-                    pupilWiseId, country, businessFunctions)
-                    .project(String.class, "LOWER(TRIM(genericEmailId))")
-                    .firstResultOptional();
-
-
-// **Step 1: Check Master Table for Generic Email ID**
-            Optional<String> genericEmailsOpt = MasterTable.find(
-                    "LOWER(TRIM(pupilWiseId)) = ?1 AND LOWER(TRIM(country)) = ?2 AND LOWER(TRIM(businessFunction)) IN ?3",
-                    pupilWiseId, country, businessFunctions)
-                    .project(String.class, "LOWER(TRIM(genericEmailId))")
-                    .firstResultOptional();
-
-            if (genericEmailsOpt.isPresent() && !genericEmailsOpt.get().isBlank()) {
-                return splitSortAndCleanEmails(genericEmailsOpt.get()); // ✅ Return parsed list
-            }
-
-            // **
-
-
-String sql = "SELECT LOWER(TRIM(genericEmailId)) FROM master_table " +
-             "WHERE LOWER(TRIM(pupilWiseId)) = ?1 " +
-             "AND LOWER(TRIM(country)) = ?2 " +
-             "AND LOWER(TRIM(businessFunction)) IN (?3) LIMIT 1";
-
-Optional<String> genericEmailsOpt = entityManager.createNativeQuery(sql, String.class)
-        .setParameter(1, pupilWiseId)
-        .setParameter(2, country)
-        .setParameter(3, businessFunctions)
-        .getResultList()
-        .stream()
-        .findFirst();  // Convert to Optional
-
-WITH RECURSIVE TeamHierarchy AS (
-    -- Base Case: Select rows where team_name = 'skill1'
-    SELECT 
-        team_name, 
-        CASE 
-            WHEN team_type = 'team' THEN work_basket 
-            ELSE team_access 
-        END AS selected_value,
-        team_type
-    FROM team_configuration
-    WHERE team_name = 'skill1'
-    
-    UNION ALL
-
-    -- Recursive Case: Find new teams from team_access
-    SELECT 
-        tc.team_name, 
-        CASE 
-            WHEN tc.team_type = 'team' THEN tc.work_basket 
-            ELSE tc.team_access 
-        END AS selected_value,
-        tc.team_type
-    FROM team_configuration tc
-    INNER JOIN TeamHierarchy th ON tc.team_name = th.selected_value
-    WHERE tc.team_type = 'group'
-)
-
-SELECT team_name, selected_value FROM TeamHierarchy;
-
-
-WITH RECURSIVE TeamHierarchy AS (
-    -- Base Case: Select rows where team_name = 'skill1'
-    SELECT 
-        team_name, 
-        work_basket AS selected_value
-    FROM team_configuration
-    WHERE team_name = 'skill1' AND team_type = 'team'
-    
-    UNION ALL
-
-    -- Recursive Case: Expand groups and continue filtering
-    SELECT 
-        tc.team_name, 
-        tc.work_basket
-    FROM team_configuration tc
-    INNER JOIN (
-        -- Expand comma-separated team_access values into individual rows
-        SELECT DISTINCT TRIM(value) AS team_name
-        FROM TeamHierarchy
-        JOIN LATERAL STRING_SPLIT(selected_value, ',') ON TRUE  -- Adjust for your DBMS
-    ) expanded ON tc.team_name = expanded.team_name
-    WHERE tc.team_type = 'team'
-)
-
-SELECT team_name, selected_value FROM TeamHierarchy;
-
--- SQL Script to Retrieve Generic IT based on MCA or Email TeamInfo
-
--- Parameters:
--- :bf       => Business Function
--- :country  => Country
--- :branch   => Branch
--- :teams    => Teams (applicable if profile is Cache, L2, or L1)
--- :profile  => Profile (e.g., 'Cache', 'L2', 'L1', or others)
-
-WITH MCA_Result AS (
-    SELECT generic_it, 1 AS priority
-    FROM mca_table
-    WHERE business_function = :bf
-      -- For FMO, do not apply the country filter; for others, apply it
-      AND ((:bf = 'FMO') OR (country = :country))
-),
-Email_Result AS (
-    SELECT generic_it, 2 AS priority
-    FROM email_team_info
-    WHERE country = :country
-      AND business_function = :bf
-      AND branch = :branch
-      -- Apply team filter only if profile is Cache, L2, or L1; else, skip team filter.
-      AND (
-            ( :profile IN ('Cache', 'L2', 'L1') AND teams = :teams )
-         OR ( :profile NOT IN ('Cache', 'L2', 'L1') )
-      )
-)
-SELECT generic_it
-FROM (
-    SELECT generic_it, priority FROM MCA_Result
-    UNION ALL
-    SELECT generic_it, priority FROM Email_Result
-) AS Results
-ORDER BY priority
-LIMIT 1;
-
-// Fetch the country name using Intl.DisplayNames API
-let countryName = new Intl.DisplayNames(['en'], { type: 'region' }).of(countryCode);
-
-// Handle specific exceptions where the default name is too long or includes unnecessary details
-const exceptions = {
-    "HK": "Hong Kong",  // Default: "Hong Kong SAR"
-    "MO": "Macau",  // Default: "Macau SAR"
-    "TW": "Taiwan",  // Default: "Taiwan, Province of China"
-    "US": "United States",  // Default: "United States of America"
-    "GB": "United Kingdom",  // Default: "United Kingdom of Great Britain and Northern Ireland"
-    "VA": "Vatican City"  // Default: "Holy See"
-};
-
-// If the countryCode exists in the exceptions list, replace it with the corrected name
-if (exceptions[countryCode]) {
-    countryName = exceptions[countryCode];
-}
-
-// Return the corrected country name
-return countryName;
-
-import { LitElement, html, css } from 'lit';
-
-export class ModalPopup extends LitElement {
-  static styles = css`
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-    }
-    .modal-content {
-      background-color: white;
-      margin: 15% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 300px;
-      text-align: center;
-    }
-    .show {
-      display: block;
-    }
-    .close {
-      float: right;
-      cursor: pointer;
-    }
-  `;
-
-  static properties = {
-    isOpen: { type: Boolean }
-  };
-
-  constructor() {
-    super();
-    this.isOpen = false;
-  }
-
-  openModal() {
-    this.isOpen = true;
-  }
-
-  closeModal() {
-    this.isOpen = false;
-  }
-
-  render() {
-    return html`
-      <div class="modal ${this.isOpen ? 'show' : ''}" @click="${this.closeModal}">
-        <div class="modal-content" @click="${e => e.stopPropagation()}">
-          <span class="close" @click="${this.closeModal}">&times;</span>
-          <p>Data saved successfully!</p>
-        </div>
-      </div>
-    `;
-  }
-}
-
-customElements.define('modal-popup', ModalPopup);
-
+Based on the image you provided, which contains a list of notes about Java programming concepts, I’ll analyze the content and provide detailed documentation with explanations and examples for each point. The notes appear to be educational or tutorial material, likely from a Java programming course or guide. Below is a structured, detailed breakdown of each point, including explanations, examples, and additional context where relevant.
+
+Detailed Documentation of Java Notes
+1. “In Java all the statements we have to write within class block.”
+	•	Explanation: In Java, all code (statements, methods, variables) must be written inside a class. Java is an object-oriented language, and it enforces that all executable code resides within the structure of a class. This is different from languages like C, where code can be written outside of class definitions (e.g., in global scope).
+	•	Example: public class Main {
+	•	    public static void main(String[] args) {
+	•	        System.out.println("Hello, World!"); // Statement inside a class
+	•	    }
+	•	}
+	•	
+	•	Additional Notes: This rule ensures encapsulation and modularity, core principles of object-oriented programming (OOP). You cannot write standalone statements outside a class block in Java.
+
+2. “Always keep first letter of ur class name as a capital. It increases the readability of ur code.”
+	•	Explanation: Java follows a naming convention where class names should start with an uppercase letter (e.g., MyClass, Student). This is part of Java’s coding standards (as outlined in the Java Code Conventions by Oracle) to improve code readability and consistency. It distinguishes class names from variable or method names, which typically start with lowercase letters.
+	•	Example: public class Student { // Correct: Starts with uppercase
+	•	    String name;
+	•	
+	•	    public static void main(String[] args) {
+	•	        Student student = new Student(); // Variable starts with lowercase
+	•	    }
+	•	}
+	•	
+	•	public class student { // Incorrect: Should start with uppercase
+	•	    // ...
+	•	}
+	•	
+	•	Additional Notes: This convention is not enforced by the compiler but is a best practice. Tools like IDEs (e.g., IntelliJ, Eclipse) often flag non-conforming names as warnings.
+
+3. “If you want to make any class of java executable then it must be having a main() method.”
+	•	Explanation: To run a Java program, at least one class must contain a public static void main(String[] args) method. This method serves as the entry point for the Java Virtual Machine (JVM) to start executing the program. Without it, the JVM won’t know where to begin.
+	•	Example: public class HelloWorld {
+	•	    public static void main(String[] args) { // Entry point
+	•	        System.out.println("Hello, World!");
+	•	    }
+	•	}
+	•	
+	•	Additional Notes: The main method must be public (accessible), static (can be called without an instance), and accept a String[] array as an argument (command-line arguments). Multiple classes can have main methods, but only one is executed when running the program.
+
+4. “Not every class is requiring a main() method.”
+	•	Explanation: While a Java program needs at least one class with a main method to be executable, not every class in a program requires one. Classes can be used for defining objects, methods, or utilities without being the entry point.
+	•	Example: public class Utility { // No main method needed
+	•	    public int add(int a, int b) {
+	•	        return a + b;
+	•	    }
+	•	}
+	•	
+	•	public class Main {
+	•	    public static void main(String[] args) {
+	•	        Utility util = new Utility();
+	•	        System.out.println(util.add(5, 3)); // Uses Utility class
+	•	    }
+	•	}
+	•	
+	•	Additional Notes: Helper classes, libraries, or abstract classes often don’t need a main method, as their purpose is to support other executable classes.
+
+5. “Java has inherited a complete syntax from the ‘C’ language.”
+	•	Explanation: Java’s syntax is heavily influenced by C and C++, including curly braces {} for blocks, semicolons ; to end statements, and similar control structures (e.g., if, for, while). However, Java simplifies some aspects of C, such as removing pointers and manual memory management (replacing it with garbage collection).
+	•	Example: // C-style syntax in Java
+	•	public class Example {
+	•	    public static void main(String[] args) {
+	•	        int i; // Similar to C variable declaration
+	•	        for (i = 0; i < 5; i++) { // C-style for loop
+	•	            System.out.println(i);
+	•	        }
+	•	    }
+	•	}
+	•	
+	•	Additional Notes: While Java inherits syntax from C, it introduces unique features like platform independence (via the JVM), OOP principles, and robust exception handling, distinguishing it from C.
+
+6. “The source code file of java programme must be stored in a file having a extension .java .”
+	•	Explanation: Java source code files must have the .java extension. This is the standard file format for Java source code, which is compiled into .class files (bytecode) by the Java compiler (javac).
+	•	Example:
+	◦	File name: MyProgram.java
+	◦	Content: public class MyProgram {
+	◦	    public static void main(String[] args) {
+	◦	        System.out.println("This is a Java program.");
+	◦	    }
+	◦	}
+	◦	
+	◦	Compile with: javac MyProgram.java to produce MyProgram.class.
+	•	Additional Notes: The file name must match the public class name (case-sensitive) for compilation to succeed.
+
+7. “Name of java file should be the same as ur class name.”
+	•	Explanation: If a Java file contains a public class, the file name must exactly match the class name (including case). This is a Java compilation requirement to ensure organization and clarity.
+	•	Example: // File name must be "Person.java"
+	•	public class Person {
+	•	    public static void main(String[] args) {
+	•	        System.out.println("I am a Person.");
+	•	    }
+	•	}
+	•	
+	•	Additional Notes: If the class is not public, the file name doesn’t have to match, but it’s still a best practice for consistency.
+
+8. “If nothing is left to be executed within a main() method then java programme terminates automatically.”
+	•	Explanation: When the main method finishes executing all its statements (or reaches the end), the Java program terminates automatically. The JVM shuts down unless there are non-daemon threads running (e.g., background threads).
+	•	Example: public class SimpleProgram {
+	•	    public static void main(String[] args) {
+	•	        System.out.println("Program starts.");
+	•	        System.out.println("Program ends."); // After this, the program terminates
+	•	    }
+	•	}
+	•	
+	•	Additional Notes: If a program has infinite loops or threads, it may not terminate automatically unless explicitly stopped (e.g., via System.exit(0)).
+
+9. “Physical presence of any software in RAM is known as one instance of that software.”
+	•	Explanation: In Java (and computing generally), an “instance” refers to a running copy or execution of a program or object in memory (RAM). For software, when it’s loaded into RAM by the operating system (O.S.), it becomes an instance.
+	•	Example:
+	◦	Running java MyProgram loads the program into RAM, creating an instance of the JVM and the program.
+	•	Additional Notes: In OOP, an instance also refers to an object created from a class. Here, it’s used in the broader context of software execution.
+
+10. “Can you run more than one jvm simultaneously in single O.S. (Yes)”
+	•	Explanation: Yes, you can run multiple JVM instances simultaneously on a single operating system. Each JVM instance is a separate process, and the O.S. manages them independently.
+	•	Example:
+	◦	Open two terminal windows and run: java MyProgram1
+	◦	java MyProgram2
+	◦	
+	◦	Both programs run in separate JVM instances, consuming their own memory and resources.
+	•	Additional Notes: Each JVM instance is isolated, but they share system resources like CPU and RAM, managed by the O.S.
+
+11. “Byte code of every class is always stored in a separate .class file and the name of that .class file will be the same as your class name.”
+	•	Explanation: When Java source code (.java) is compiled with javac, it produces bytecode in .class files. Each public class is stored in its own .class file, named exactly after the class (case-sensitive).
+	•	Example:
+	◦	Source file: MyClass.java public class MyClass {
+	◦	    public static void main(String[] args) {
+	◦	        System.out.println("Bytecode generated!");
+	◦	    }
+	◦	}
+	◦	
+	◦	After compilation: javac MyClass.java produces MyClass.class.
+	•	Additional Notes: Inner classes or non-public classes may share or be nested in the same .class file, but public top-level classes get their own.
+
+12. “Can you keep more than one class in a single .java file (Yes)”
+	•	Explanation: Yes, a single .java file can contain multiple classes. However, only one class can be public, and its name must match the file name. Other classes can be non-public (e.g., default access).
+	•	Example: // File name: MultiClass.java
+	•	public class MultiClass {
+	•	    public static void main(String[] args) {
+	•	        System.out.println("Main class");
+	•	        Helper helper = new Helper();
+	•	        helper.display();
+	•	    }
+	•	}
+	•	
+	•	class Helper { // Non-public class
+	•	    void display() {
+	•	        System.out.println("Helper class");
+	•	    }
+	•	}
+	•	
+	•	Additional Notes: Only the public class’s main method (if present) is the entry point, but all classes are compiled into .class files.
+
+13. “Always keep separate java file for each class.”
+	•	Explanation: While not strictly required, it’s a best practice to keep each class in its own .java file for better organization, maintainability, and scalability, especially in large projects. This contrasts with point 12, where multiple classes can share a file.
+	•	Example:
+	◦	Person.java: public class Person {
+	◦	    void display() {
+	◦	        System.out.println("Person class");
+	◦	    }
+	◦	}
+	◦	
+	◦	Student.java: public class Student {
+	◦	    void study() {
+	◦	        System.out.println("Student class");
+	◦	    }
+	◦	}
+	◦	
+	•	Additional Notes: This practice aligns with Java’s modularity but isn’t enforced by the compiler.
+
+14. “If you are having more than one class in a single .java file then can you keep main() method in each class (Yes)”
+	•	Explanation: Yes, each class in a .java file can have its own main method, but only one main method is executed when running the program (based on the class specified at runtime).
+	•	Example: // File name: MultiMain.java
+	•	public class MultiMain {
+	•	    public static void main(String[] args) {
+	•	        System.out.println("Main in MultiMain");
+	•	    }
+	•	}
+	•	
+	•	class AnotherClass {
+	•	    public static void main(String[] args) {
+	•	        System.out.println("Main in AnotherClass");
+	•	    }
+	•	}
+	•	
+	◦	Run with: java MultiMain (executes MultiMain’s main) or java AnotherClass (executes AnotherClass’s main).
+	•	Additional Notes: This is useful for testing or modular code, but typically, only one class is the primary entry point.
+
+15. “At a time only one .class file can be executed into the one instance of JVM.”
+	•	Explanation: When you run a Java program with java ClassName, the JVM loads and executes the bytecode of that specific .class file as the entry point. While multiple .class files may be involved (e.g., dependencies), only one is the initial execution point per JVM instance.
+	•	Example:
+	◦	If you have Main.class and Helper.class, running java Main starts with Main.class’s main method, which may use Helper.class.
+	•	Additional Notes: Multiple JVM instances can run simultaneously (as in point 10), each executing its own .class file.
+
+16. “Can you keep more than one main() method in a single class (Yes)”
+	•	Explanation: Yes, a single class can have multiple main methods with different parameter types (method overloading), but only the standard public static void main(String[] args) is recognized as the entry point by the JVM.
+	•	Example: public class MultiMain {
+	•	    public static void main(String[] args) { // Default entry point
+	•	        System.out.println("Main with String args");
+	•	    }
+	•	
+	•	    public static void main(int[] args) { // Overloaded, not used as entry point
+	•	        System.out.println("Main with int args");
+	•	    }
+	•	
+	•	    public static void main() { // Overloaded, not used as entry point
+	•	        System.out.println("Main with no args");
+	•	    }
+	•	}
+	•	
+	◦	Running java MultiMain executes only main(String[] args).
+	•	Additional Notes: Overloaded main methods can be called manually but aren’t automatically executed by the JVM.
+
+17. “RAM is divided into a small small cell by the O.S. and each cell is having a size of one byte and every cell is also having a one address starting from zero up to the number of cell.”
+	•	Explanation: RAM (Random Access Memory) is managed by the operating system, divided into small memory cells, each typically 1 byte (8 bits) in size. Each cell has a unique address, starting from 0 and incrementing up to the total number of cells (memory size).
+	•	Example:
+	◦	If RAM has 4GB (approximately 4 billion bytes), it’s divided into cells, each with addresses from 0 to 4,294,967,295.
+	◦	The JVM allocates memory from RAM for objects, stacks, and heaps, using these addresses.
+	•	Additional Notes: This is a simplified model; modern systems may use larger memory units (e.g., pages), but the concept of byte-sized cells with addresses is foundational.
+
+Summary and Additional Context
+	•	These notes cover fundamental Java concepts, including syntax, structure, execution, and memory management, with a focus on best practices and JVM behavior.
+	•	The points mix strict rules (e.g., .java extension, main method requirements) with conventions (e.g., capitalizing class names) and technical details (e.g., RAM structure).
+	•	The inclusion of “Yes/No” questions suggests this is part of an interactive or quiz-style learning resource.
+If you’d like me to expand on any specific point, provide more advanced examples, or clarify further, feel free to ask! Since the image is educational, I’ve focused on detailed, beginner-friendly explanations. If you need me to search for additional resources or examples (e.g., online tutorials, official Java documentation), I can offer to do so.
