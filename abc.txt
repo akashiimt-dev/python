@@ -23,4 +23,27 @@ function convertDateTimeFormat(dateTimeString) {
 // Example Usage
 let input = "2025-02-27 02:00AM";
 let output = convertDateTimeFormat(input);
-console.log(output); // Output: "2025-02-27T02:00:00"
+console.log(output); // Output: "2025-02-27T02:
+
+
+00:00"
+
+function convertToAMPMFormat(isoString) {
+    // Extract date and time using regex
+    let match = isoString.match(/(\d{4}-\d{2}-\d{2})T(\d{2}):\d{2}:\d{2}/);
+    
+    if (!match) return null; // Return null if format doesn't match
+
+    let [_, date, hour] = match;
+    hour = parseInt(hour);
+
+    // Determine AM or PM
+    let period = hour >= 12 ? "PM" : "AM";
+
+    // Convert to 12-hour format
+    let hour12 = hour % 12 || 12; // 0 → 12, 13 → 1, etc.
+
+    return `${date} ${hour12}:00${period}`;
+}
+
+//
