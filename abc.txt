@@ -955,5 +955,33 @@ let updatedText = replaceTime(text, "REPLACED");
 
 console.log(updatedText);
 
+function replaceTime(inputString, replacement) {
+    return inputString.replace(/\b\d{1,2}:\d{2} [APMapm]{2}\b/g, replacement);
+}
+
+// Example Usage
+let text = "Date 20-02-2025 05:00 AM and 07:00 PM";
+let updatedText = replaceTime(text, "REPLACED");
+
+console.log(updatedText);
+function extractDateAndReplaceTime(inputString, replacement) {
+    // Extract date using regex (format: DD-MM-YYYY)
+    let dateMatch = inputString.match(/\b\d{2}-\d{2}-\d{4}\b/);
+    let extractedDate = dateMatch ? dateMatch[0] : null;
+
+    // Replace all time occurrences (format: HH:MM AM/PM)
+    let updatedText = inputString.replace(/\b\d{1,2}:\d{2} [APMapm]{2}\b/g, replacement);
+
+    return { extractedDate, updatedText };
+}
+
+// Example Usage
+let text = "Date 20-02-2025 05:00 AM and 07:00 PM";
+let result = extractDateAndReplaceTime(text, "REPLACED");
+
+console.log("Extracted Date:", result.extractedDate);
+console.log("Updated Text:", result.updatedText);
+
+
 
 
