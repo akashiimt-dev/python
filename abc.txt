@@ -934,3 +934,13 @@ Summary and Additional Context
 	•	The text is likely part of an educational resource for beginners learning Java’s OOP features.
 If you’d like me to expand on any specific point, provide more advanced examples (e.g., GUI implementation with Swing/JavaFX), or clarify further, feel free to ask! Since the image is educational, I’ve focused on detailed, beginner-friendly explanations. If you need me to search for additional resources or tutorials (e.g., official Java documentation, GUI examples), I can offer to do so.
 
+function replaceTime(inputString, replacement) {
+    return inputString.replace(/\b\d{1,2}:\d{2} [APMapm]{2}\b/g, replacement);
+}
+
+// Example Usage
+let text = "Date 20-02-2025 05:00 AM and 07:00 PM";
+let updatedText = replaceTime(text, "REPLACED");
+
+console.log(updatedText);
+
