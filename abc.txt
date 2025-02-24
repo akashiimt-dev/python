@@ -66,5 +66,18 @@ function convertToAMPMFormat(isoString) {
 
 // Exa
 
+Subject: Request for Discussion on 2024 Year-End Review
+
+Hi Sahil,
+
+I hope this message finds you well. I wanted to kindly share that since joining the bank nearly two years ago, I haven’t received an increment, which is a first in my career. Despite my dedicated efforts—single-handedly maintaining the activity module and contributing over 6 FTEs to the TW SSOPS project along with other initiatives, all with no escalations, and earning appreciation from the respective teams—I feel this might not be fully reflected in my compensation. While my peers at the same level typically handle a single component, I’ve gone above and beyond, working countless nights and weekends, even undergoing surgery due to prolonged sitting. However, my bonus, which was already on the lower side, has only increased by an additional MYR 10k.
+
+Could we please schedule a time to discuss this at your convenience? I would deeply appreciate your insights and guidance on this matter.
+
+Warm regards,Akash Sharma
+
+This version maintains a highly polite and respectful tone, softens the language, and emphasizes gratitude while clearly conveying your concerns. Let me know if you’d like further refinements!
+
+
 
 //
