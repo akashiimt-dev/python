@@ -123,3 +123,19 @@ To ensure I’m fully prepared and aligned with the bank’s goals, I’d greatl
 
 I’m committed to aligning my efforts with the bank’s objectives and growing professionally, and I’m looking forward to our discussion. Please let me know if there’s anything else I can prepare for our call, and I’m more than happy to adjust the timing if needed. I truly appreciate your time, expertise, and support.
 
+
+Subject: Project Status Update
+
+Dear [Recipient’s Name],
+
+Current project updates:
+	•	SSOPS SR manual case creation is in progress, and data is populating on the View Case screen.
+	•	Arul is working on Email SR creation.
+	•	Sugan is handling the Transfer Screen.
+	•	Suriya is being enabled to work on View Case along with me.
+	•	I am working on Compose Email and integrating all components together.
+	•	Supporting the team to ensure everyone has end-to-end awareness.
+	•	SSOPS story in Yoda is still pending.
+
+Best regards,
+[Your Name]
