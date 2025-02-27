@@ -139,3 +139,49 @@ Current project updates:
 
 Best regards,
 [Your Name]
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+class Person {
+    String name;
+    int sum;
+
+    public Person(String name, int sum) {
+        this.name = name;
+        this.sum = sum;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getSum() {
+        return sum;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // List of Person objects
+        List<Person> people = Arrays.asList(
+            new Person("Akash", 198),
+            new Person("Sharma", 198),
+            new Person("Akash", 98)
+        );
+
+        // List of names to filter
+        List<String> filterNames = Arrays.asList("Akash");
+
+        // Filter and sum the "sum" field for each name
+        Map<String, Integer> result = people.stream()
+            .filter(person -> filterNames.contains(person.getName())) // Filter by names
+            .collect(Collectors.groupingBy(
+                Person::getName, 
+                Collectors.summingInt(Person::getSum) // Sum values
+            ));
+
+        // Print result
+        System.out.println(result); // Output: {Akash=296}
+    }
+}
