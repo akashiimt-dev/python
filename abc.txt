@@ -185,3 +185,33 @@ public class Main {
         System.out.println(result); // Output: {Akash=296}
     }
 }
+BigDecimal sum
+        List<Person> people = Arrays.asList(
+            new Person("Akash", new BigDecimal("198.50")),
+            new Person("Sharma", new BigDecimal("198.75")),
+            new Person("Akash", new BigDecimal("98.25"))
+        );
+
+        // List of ABC objects with only names
+        List<ABC> test = Arrays.asList(
+            new ABC("Akash", BigDecimal.ZERO),  // Amount will be computed later
+            new ABC("Sharma", BigDecimal.ZERO)
+        );
+
+        // Compute the sum of "sum" values for each name using BigDecimal
+        Map<String, BigDecimal> sumByName = people.stream()
+            .collect(Collectors.groupingBy(
+                Person::getName,
+                Collectors.reducing(BigDecimal.ZERO, Person::getSum, BigDecimal::add) // Summing BigDecimal values
+            ));
+
+        // Populate the amount field in ABC using the computed sum values
+        List<ABC> updatedTest = test.stream()
+            .map(abc -> new ABC(abc.name, sumByName.getOrDefault(abc.name, BigDecimal.ZERO)))
+            .collect(Collectors.toList());
+
+        // Print the updated list
+        System.out.println(updatedTest);
+    }
+}
+
