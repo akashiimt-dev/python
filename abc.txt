@@ -215,3 +215,5 @@ BigDecimal sum
     }
 }
 
+Please find attached the sheet listing the completed stories. At a high level, SR case creation, resolution, cancellation, right panel, and email composition are working in SIT for SSOPS. However, the story is not fully completed yet—we are currently testing some enabled functionalities outside the story. We will provide an update once they are finalized.
+
