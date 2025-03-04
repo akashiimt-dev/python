@@ -217,3 +217,17 @@ BigDecimal sum
 
 Please find attached the sheet listing the completed stories. At a high level, SR case creation, resolution, cancellation, right panel, and email composition are working in SIT for SSOPS. However, the story is not fully completed yet—we are currently testing some enabled functionalities outside the story. We will provide an update once they are finalized.
 
+const people = [
+    { age: 25, name: "Alice", level: "Medium", country: "USA" },
+    { name: "Bob", age: 30, level: "Low", country: "Canada" },
+    { level: "High", name: "Charlie", country: "UK", age: 35 }
+];
+
+const nameOrder = ["Bob", "Charlie", "Alice"]; // Define custom priority order
+
+people.sort((a, b) => {
+    return nameOrder.indexOf(a.name) - nameOrder.indexOf(b.name);
+});
+
+console.log(people);
+
