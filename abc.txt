@@ -303,5 +303,35 @@ function convertToUTC(dateInput) {
 }
 
 
+function parseCustomDate(dateString) {
+    // Example input: "07-Mar-25 01.16.08 PM"
+    const [datePart, timePart, period] = dateString.split(" "); // Split into "07-Mar-25", "01.16.08", "PM"
+    const [day, month, year] = datePart.split("-"); // Split date into "07", "Mar", "25"
+    const [hours, minutes, seconds] = timePart.split("."); // Split time into "01", "16", "08"
+
+    // Map month abbreviations to numbers (0-11 for JavaScript Date)
+    const monthMap = {
+        "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5,
+        "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11
+    };
+
+    // Convert to 24-hour format
+    let hourNum = parseInt(hours, 10);
+    if (period === "PM" && hourNum !== 12) {
+        hourNum += 12;
+    } else if (period === "AM" && hourNum === 12) {
+        hourNum = 0;
+    }
+
+    // Assume year "25" means 2025
+    const fullYear = parseInt(year, 10) < 100 ? 2000 + parseInt(year, 10) : parseInt(year, 10);
+
+    // Create a Date object
+    const parsedDate = new Date(fullYear, monthMap[month], parseInt(day, 10), hourNum, parseInt(minutes, 10), parseInt(seconds, 10));
+
+    // Return the Date object, or a default if invalid
+    return isNaN(parsedDate.getTime()) ? new Date(0) : parsedDate;
+}
+
 
 
