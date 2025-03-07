@@ -230,4 +230,78 @@ people.sort((a, b) => {
 });
 
 console.log(people);
+task = task.taskName.toLowerCase() === 'reviewassignment';
+
+if (reviewTask.length === 0) {
+    return null;
+} else {
+    // Filter tasks that are completed
+    const completedTask = reviewTask.filter(
+        task => task.status.toLowerCase() === 'completed'
+    );
+
+    if (completedTask.length > 0) {
+        // Find the task with the latest completion time
+        const latestCompleteTask = completedTask.reduce((latest, task) => {
+            // Validate task.enqueueTime and convert to UTC
+            const taskCompletionTime = convertToUTC(task.enqueueTime);
+
+            // If taskCompletionTime is invalid, skip this task by returning the current latest
+            if (isNaN(taskCompletionTime.getTime())) {
+                return latest;
+            }
+
+            // Ensure latest is a Date object
+            const latestDate = latest instanceof Date ? latest : new Date(0);
+
+            // Compare and return the later date
+            return taskCompletionTime > latestDate ? taskCompletionTime : latestDate;
+        }, new Date(0)); // Initialize with Unix epoch
+
+        // If latestCompleteTask is still the initial value, no valid dates were found
+        if (latestCompleteTask.getTime() === new Date(0).getTime()) {
+            return new Date(0); // Or handle as needed
+        }
+
+        return latestCompleteTask;
+    } else {
+        return true;
+    }
+}
+
+// If no tasks are 'Completed' or 'In Progress'
+return null;
+function convertToUTC(dateInput) {
+    // If dateInput is already a Date object, use it directly
+    if (dateInput instanceof Date) {
+        return new Date(Date.UTC(
+            dateInput.getUTCFullYear(),
+            dateInput.getUTCMonth(),
+            dateInput.getUTCDate(),
+            dateInput.getUTCHours(),
+            dateInput.getUTCMinutes(),
+            dateInput.getUTCSeconds()
+        ));
+    }
+
+    // Otherwise, try to parse the dateInput as a string
+    const parsedDate = new Date(dateInput);
+    if (isNaN(parsedDate.getTime())) {
+        // If parsing fails, return a default date (Unix epoch)
+        return new Date(0);
+    }
+
+    // Convert to UTC
+    return new Date(Date.UTC(
+        parsedDate.getUTCFullYear(),
+        parsedDate.getUTCMonth(),
+        parsedDate.getUTCDate(),
+        parsedDate.getUTCHours(),
+        parsedDate.getUTCMinutes(),
+        parsedDate.getUTCSeconds()
+    ));
+}
+
+
+
 
