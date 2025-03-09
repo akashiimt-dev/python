@@ -332,6 +332,16 @@ function parseCustomDate(dateString) {
     // Return the Date object, or a default if invalid
     return isNaN(parsedDate.getTime()) ? new Date(0) : parsedDate;
 }
+const data = ["as", "ab", "h", "z", "r", "a", "s"];
+const moveToEnd = ["ab", "h", "z", "r"]; // Change this to any four elements
 
+data.sort((a, b) => {
+  if (moveToEnd.includes(a) && moveToEnd.includes(b)) return 0; // Maintain their relative order
+  if (moveToEnd.includes(a)) return 1;  // Move `a` to the end
+  if (moveToEnd.includes(b)) return -1; // Keep other elements before them
+  return a.localeCompare(b); // Sort alphabetically
+});
+
+console.log(data); // Output: ["a", "as", "s", "ab", "h", "z", "r"]
 
 
