@@ -344,4 +344,15 @@ data.sort((a, b) => {
 
 console.log(data); // Output: ["a", "as", "s", "ab", "h", "z", "r"]
 
+const moveToEnd = ['ab', 'h', 'z', 'r']; // Elements to move to the end
 
+this.workbasketListParentChildData.sort((a, b) => {
+  const aValue = a.workbasket || ''; // Default to empty string if undefined/null
+  const bValue = b.workbasket || ''; 
+
+  if (moveToEnd.includes(aValue) && moveToEnd.includes(bValue)) return 0; // Maintain order
+  if (moveToEnd.includes(aValue)) return 1; // Move `a` to the end
+  if (moveToEnd.includes(bValue)) return -1; // Move `b` before `a`
+  
+  return aValue.localeCompare(bValue); // Sort alphabetically (handles empty values)
+});
