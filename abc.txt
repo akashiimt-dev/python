@@ -356,3 +356,21 @@ this.workbasketListParentChildData.sort((a, b) => {
   
   return aValue.localeCompare(bValue); // Sort alphabetically (handles empty values)
 });
+const moveToEnd = ['ab', 'h', 'z', 'r']; // Fixed order for the last items
+
+this.workbasketListParentChildData.sort((a, b) => {
+  const aValue = a.workbasket || ''; // Handle missing values
+  const bValue = b.workbasket || '';
+
+  const aIndex = moveToEnd.indexOf(aValue);
+  const bIndex = moveToEnd.indexOf(bValue);
+
+  if (aIndex !== -1 && bIndex !== -1) {
+    return aIndex - bIndex; // Maintain sequence in moveToEnd
+  }
+  if (aIndex !== -1) return 1; // Move `a` to the end
+  if (bIndex !== -1) return -1; // Move `b` before `a`
+  
+  return aValue.localeCompare(bValue); // Sort the rest alphabetically
+});
+
