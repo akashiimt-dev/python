@@ -637,6 +637,27 @@ document.addEventListener("DOMContentLoaded", function () {
     tableRows.forEach(row => tbody.appendChild(row)); // Append sorted rows
 });
 
+// Sample array from the screenshot
+let tasks = [
+  { taskId: '158297', taskName: 'Activity', assigneeto: 'Rahul Sharma', deadline: '2025-03-13T07:30', status: 'Completed' },
+  { taskId: '158299', taskName: 'Activity', assigneeto: 'Rahul Sharma', status: 'Open-PendingCompletion', deadline: '2025-03-13T07:30' },
+  { taskId: '158301', taskName: 'ReviewAssignment', assigneeto: 'main wb 01', status: 'Open-PendingEmailREVIEW', deadline: '2025-03-13T07:30' }
+];
+
+// Custom sort function
+tasks.sort((a, b) => {
+  // If both tasks are completed or both are not completed, maintain order or sort by taskName
+  if (a.status === 'Completed' && b.status === 'Completed') return 0;
+  if (a.status !== 'Completed' && b.status !== 'Completed') {
+    return a.taskName.localeCompare(b.taskName); // Sort non-completed tasks alphabetically by taskName
+  }
+  // Move completed tasks to the bottom
+  return a.status === 'Completed' ? 1 : -1;
+});
+
+// Log the result
+console.log(tasks);
+
 
 
 
