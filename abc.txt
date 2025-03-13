@@ -702,3 +702,30 @@ console.log(tasks);
 +-----------------------+  +----------------------------+
 
 
+[User clicks Assignment]
+        |
+        v
+[API Endpoint: OpenAssignment]
+        |
+        v
+[Check Existing Locks] ----> [Any Locks Found?]
+        |                           |
+    No Locks                     Yes
+        |                           |
+        v                           v
+[Lock Assignment]          [Check Lock Duration]
+        |                           |
+        v                           v
+[Update Main Table]        [> 30 mins Inactive?]
+        |                           |
+        v                      Yes  |   No
+[Update WorkList]              v      |
+        |                  [Unlock]    |
+        v                           |
+[Update WorkBasket]                |
+        |                           |
+        v                           v
+[Return Success]             [Keep Locked]
+
+
+
