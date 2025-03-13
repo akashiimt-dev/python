@@ -728,4 +728,67 @@ console.log(tasks);
 [Return Success]             [Keep Locked]
 
 
+Process Description: Opening an Assignment
+
+This process outlines what happens when a user clicks on an assignment in the system. The goal is to manage locks on tasks and cases efficiently, ensuring that only one user can work on an assignment at a time, while also handling situations where assignments have been left inactive for too long.
+
+Step 1: User Clicks an Assignment
+
+	•	The process begins when a user selects an assignment they want to work on. This triggers a call to the system’s “OpenAssignment” API endpoint.
+
+Step 2: API Endpoint - OpenAssignment
+
+	•	The system receives the request to open the assignment. It knows which case (a collection of tasks) and specific assignment (e.g., Task1, Task2, or Task3) the user wants, along with the user’s identity.
+
+Step 3: Check for Existing Locks
+
+	•	The system first checks if any tasks related to the same case are already locked by another user. A “lock” means someone else is currently working on a task, and the system tracks this in two places: the WorkList table (personal task list) and the WorkBasket table (shared task pool).
+
+Step 4: Are There Any Locks Found?
+
+	•	The system evaluates the results of the lock check:
+	•	No Locks Found: If no other user has locked any tasks for this case, the system moves forward to lock the assignment for the current user.
+	•	Locks Found: If another user has locked one or more tasks, the system needs to investigate further.
+
+Path A: No Locks Found
+
+	•	Step 5A: Lock the Assignment
+	•	Since no one else is working on tasks for this case, the system locks the selected assignment for the current user. This ensures no one else can take it while the user is working.
+	•	Step 6A: Update the Main Table
+	•	The system updates the Case Table (the main record for the case) to show that the case is now locked by the current user, along with the current time.
+	•	Step 7A: Update WorkList
+	•	The system marks the assignment as locked in the WorkList table, recording the user and timestamp.
+	•	Step 8A: Update WorkBasket
+	•	Similarly, the assignment is marked as locked in the WorkBasket table with the same details.
+	•	Step 9A: Return Success
+	•	The system confirms to the user that the assignment is now open and locked for them to work on.
+
+Path B: Locks Found
+
+	•	Step 5B: Check Lock Duration
+	•	For each locked task found, the system calculates how long it has been locked by comparing the lock timestamp to the current time.
+	•	Step 6B: Is It Inactive for More Than 30 Minutes?
+	•	The system checks if the lock has been inactive for over 30 minutes:
+	•	Yes (Inactive > 30 Minutes):
+	•	Step 7B: Unlock the Task
+	•	If a task has been locked for more than 30 minutes, the system assumes the other user is no longer active. It unlocks the task by clearing the lock details in both the WorkList and WorkBasket tables.
+	•	The process then loops back to check if any other locks remain (Step 3). If all tasks are unlocked, it follows Path A to lock the new assignment.
+	•	No (Inactive ≤ 30 Minutes):
+	•	Step 8B: Keep Locked
+	•	If any task is still actively locked (less than or equal to 30 minutes), the system keeps the case locked to prevent conflicts. It stops the process here and informs the user that the case remains locked due to another active user.
+
+Final Outcome
+
+	•	Success: If no active locks remain (either none existed or all were inactive and unlocked), the assignment is locked for the user, and they can start working.
+	•	Locked: If any task is still actively locked by another user, the system keeps the case locked and tells the user they can’t proceed yet.
+
+Key Points to Understand
+
+	•	Why Locks Matter: Locks prevent multiple users from working on the same tasks at once, avoiding confusion or duplicated effort.
+	•	30-Minute Rule: If a task is locked but inactive for over 30 minutes, the system assumes the user has abandoned it and frees it up for others.
+	•	Tables Involved:
+	•	Case Table: Tracks the overall case status (locked or not).
+	•	WorkList Table: Manages personal task assignments.
+	•	WorkBasket Table: Manages shared task assignments.
+	•	Consistency: The system updates all three tables to keep everything in sync.
 
