@@ -658,6 +658,47 @@ tasks.sort((a, b) => {
 // Log the result
 console.log(tasks);
 
-
++---------------------------+
+|         API Call          |
+| (User clicks assignment)  |
++------------+--------------+
+             |
+             v
++---------------------------+
+| Check if assignment is    |
+| already locked by another |
+| user in WorkList/WorkBasket |
++------------+--------------+
+             |
+        Yes  |  No
+  +----------+----------+
+  |                     |
+  v                     v
++-----------------------+  +---------------------------+
+| Check assignment lock |  | Lock the assignment      |
+| time in WorkList/    |  | Update lock flag & time  |
+| WorkBasket (>30 min) |  | in WorkList, WorkBasket  |
++------------+----------+  | and Main Table          |
+             |             +---------------------------+
+             v
++-----------------------+
+| Unlock in WorkList &  |
+| WorkBasket if > 30 min|
++------------+----------+
+             |
+             v
++---------------------------+
+| Check if all tasks        |
+| are unlocked in both      |
+| WorkList and WorkBasket   |
++------------+--------------+
+             |
+        Yes  |  No
+  +----------+----------+
+  |                     |
+  v                     v
++-----------------------+  +----------------------------+
+| Unlock Case Table     |  | Keep Case Table Locked     |
++-----------------------+  +----------------------------+
 
 
