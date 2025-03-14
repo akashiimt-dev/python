@@ -1446,3 +1446,223 @@ public class AssignmentService {
     }
 }
 
+package com.example.service;
+
+import com.example.entity.ActivityCase;
+import com.example.entity.WorkBasket;
+import com.example.entity.WorkList;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+@ApplicationScoped
+public class AssignmentService {
+
+    @Inject
+    EntityManager entityManager;
+
+    @Transactional
+    public String openAssignment(Long caseId, Long inputTaskId, String userId) {
+        // Convert numeric caseId to the expected string format for WorkList/WorkBasket
+        String caseIdStr = "AC-ZZ-" + String.format("%010d", caseId); // Adjust format as per your data
+
+        // Step 2: Fetch the ActivityCase record (single query)
+        Query caseQuery = entityManager.createQuery(
+                "SELECT ac FROM ActivityCase ac WHERE ac.caseId = :caseId", ActivityCase.class);
+        caseQuery.setParameter("caseId", caseId);
+        ActivityCase activityCase = (ActivityCase) caseQuery.getSingleResult();
+        if (activityCase == null) {
+            return "Case not found for caseId: " + caseId;
+        }
+
+        // Step 3: Fetch tasks from WorkList and WorkBasket in parallel (single query per table)
+        CompletableFuture<List<WorkList>> workListTasksFuture = CompletableFuture.supplyAsync(() -> {
+            Query query = entityManager.createNativeQuery(
+                    "SELECT * FROM client_srvc.asign_wl WHERE case_id = :caseId", WorkList.class);
+            query.setParameter("caseId", caseIdStr);
+            return query.getResultList();
+        });
+
+        CompletableFuture<List<WorkBasket>> workBasketTasksFuture = CompletableFuture.supplyAsync(() -> {
+            Query query = entityManager.createNativeQuery(
+                    "SELECT * FROM client_srvc.asign_wb WHERE case_id = :caseId", WorkBasket.class);
+            query.setParameter("caseId", caseIdStr);
+            return query.getResultList();
+        });
+
+        // Combine results
+        List<WorkList> workListTasks = workListTasksFuture.join();
+        List<WorkBasket> workBasketTasks = workBasketTasksFuture.join();
+
+        // Step 4: Filter tasks by taskId in memory
+        WorkList workListTask = workListTasks.stream()
+                .filter(wl -> {
+                    try {
+                        String flowType = wl.getFlowType();
+                        Long taskId = (flowType != null && !flowType.isEmpty())
+                                ? Long.parseLong((flowType)::JSONB->0->>'id')
+                                : null;
+                        return taskId != null && taskId.equals(inputTaskId);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .findFirst()
+                .orElse(null);
+
+        WorkBasket workBasketTask = workBasketTasks.stream()
+                .filter(wb -> {
+                    try {
+                        String flowType = wb.getFlowType();
+                        Long taskId = (flowType != null && !flowType.isEmpty())
+                                ? Long.parseLong((flowType)::JSONB->0->>'id')
+                                : null;
+                        return taskId != null && taskId.equals(inputTaskId);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .findFirst()
+                .orElse(null);
+
+        if (workListTask == null && workBasketTask == null) {
+            return "Task not found in WorkList or WorkBasket for caseId: " + caseIdStr + " and taskId: " + inputTaskId;
+        }
+
+        // Step 5: Check and unlock inactive tasks (more than 30 minutes in UTC)
+        boolean allTasksUnlocked = checkAndUnlockInactiveTasks(workListTasks, workBasketTasks, userId);
+
+        // Step 6: Update ActivityCase if all tasks are unlocked
+        if (allTasksUnlocked && "LOCKED".equals(activityCase.getLockedStatus())) {
+            activityCase.setLockedStatus("UNLOCKED");
+            activityCase.setLockedBy(null);
+            activityCase.setLockedOn(null);
+            activityCase.setLockedOpname(null);
+            entityManager.merge(activityCase);
+        }
+
+        // Step 7: Check for existing active locks
+        AtomicBoolean hasActiveLocks = new AtomicBoolean(false);
+        AtomicReference<String> lockedByRef = new AtomicReference<>();
+
+        // Filter locked tasks in memory (excluding current user and unlocked tasks)
+        List<WorkList> lockedWorkListTasks = workListTasks.stream()
+                .filter(task -> task.getLockedBy() != null && !task.getLockedBy().equals(userId) && isTaskStillActive(task.getLockedOn()))
+                .collect(Collectors.toList());
+
+        List<WorkBasket> lockedWorkBasketTasks = workBasketTasks.stream()
+                .filter(task -> task.getLockedBy() != null && !task.getLockedBy().equals(userId) && isTaskStillActive(task.getLockedOn()))
+                .collect(Collectors.toList());
+
+        hasActiveLocks.set(!lockedWorkListTasks.isEmpty() || !lockedWorkBasketTasks.isEmpty());
+        if (hasActiveLocks.get() && !lockedWorkListTasks.isEmpty()) {
+            lockedByRef.set(lockedWorkListTasks.get(0).getLockedBy());
+        } else if (hasActiveLocks.get() && !lockedWorkBasketTasks.isEmpty()) {
+            lockedByRef.set(lockedWorkBasketTasks.get(0).getLockedBy());
+        }
+
+        if (hasActiveLocks.get()) {
+            // Step 8: Locks found, proceed to Path B
+            return "Case is locked by " + lockedByRef.get() + ". Try again later.";
+        }
+
+        // Path A: No active locks found, lock the task and case
+        return lockAssignment(activityCase, workListTask, workBasketTask, userId);
+    }
+
+    private boolean checkAndUnlockInactiveTasks(List<WorkList> workListTasks, List<WorkBasket> workBasketTasks, String userId) {
+        boolean hasActiveLocks = false;
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC")); // Use UTC time
+
+        // Check and unlock WorkList tasks
+        for (WorkList task : workListTasks) {
+            if (task.getLockedBy() != null && !task.getLockedBy().equals(userId)) {
+                if (isTaskInactiveFor30Minutes(task.getLockedOn(), now)) {
+                    task.setLockedBy(null);
+                    task.setLockedOn(null);
+                    entityManager.merge(task);
+                } else {
+                    hasActiveLocks = true;
+                }
+            }
+        }
+
+        // Check and unlock WorkBasket tasks
+        for (WorkBasket task : workBasketTasks) {
+            if (task.getLockedBy() != null && !task.getLockedBy().equals(userId)) {
+                if (isTaskInactiveFor30Minutes(task.getLockedOn(), now)) {
+                    task.setLockedBy(null);
+                    task.setLockedOn(null);
+                    entityManager.merge(task);
+                } else {
+                    hasActiveLocks = true;
+                }
+            }
+        }
+
+        return !hasActiveLocks;
+    }
+
+    private boolean isTaskStillActive(LocalDateTime lockedOn) {
+        if (lockedOn == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC")); // Use UTC time
+        Duration duration = Duration.between(lockedOn, now);
+        return duration.toMinutes() <= 30;
+    }
+
+    private boolean isTaskInactiveFor30Minutes(LocalDateTime lockedOn, LocalDateTime now) {
+        if (lockedOn == null) {
+            return false;
+        }
+        Duration duration = Duration.between(lockedOn, now);
+        return duration.toMinutes() > 30;
+    }
+
+    private String lockAssignment(ActivityCase activityCase, WorkList workListTask, WorkBasket workBasketTask, String userId) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC")); // Use UTC time
+
+        // Step 5A & 6A: Lock the case
+        activityCase.setLockedStatus("LOCKED");
+        activityCase.setLockedBy(userId);
+        activityCase.setLockedOpname("OpenAssignment");
+        activityCase.setLockedOn(now);
+        entityManager.merge(activityCase);
+
+        // Step 7A & 8A: Update the task in WorkList or WorkBasket
+        if (workListTask != null) {
+            workListTask.setLockedBy(userId);
+            workListTask.setLockedOn(now);
+            entityManager.merge(workListTask);
+        } else if (workBasketTask != null) {
+            workBasketTask.setLockedBy(userId);
+            workBasketTask.setLockedOn(now);
+            entityManager.merge(workBasketTask);
+        }
+
+        // Step 9A: Return success
+        return "Task locked successfully for user " + userId;
+    }
+
+    // Helper method to extract numeric caseId from string format
+    private Long extractNumericCaseId(String caseIdStr) {
+        // Example: Extract numeric part from "AC-ZZ-20250312-M00622"
+        String[] parts = caseIdStr.split("-");
+        if (parts.length >= 2) {
+            return Long.parseLong(parts[1].replaceAll("[^0-9]", ""));
+        }
+        return null;
+    }
+}
