@@ -11,3 +11,8 @@ This logic is critical as the password management process will depend on these c
 Once I receive your approval, we will implement the logic and ensure thorough testing to avoid any further surprises.
 Looking forward to your response.
 Best regards, [Your Full Name] [Your Job Title] [Your Contact Information]
+Please test the functionality for locking and unlocking in Activity. Let me explain how it works:
+	1.	If there are 2-3 assignments or tasks, and any content is locked by another user, you will not be able to access it.
+	2.	If you have two tasks (Task A and Task B) open in different windows, both can be accessed simultaneously. However, opening the same task in multiple windows is not allowed.
+	3.	If you perform all actions through the button, the lock/unlock process happens automatically in the background.
+	4.	If you open Task A and then close the entire browser, you will need to wait 15 minutes before reopening the same task. Currently, we have a 15-minute lock window, which may be extended later.
