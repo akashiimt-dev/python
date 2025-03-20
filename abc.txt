@@ -19,3 +19,5 @@ Looking forward to your guidance on how I can further align myself for greater r
 
 Best,
 [Your Name]
+
+"(SR|AC)-[A-Z]{2}-\\d{8}-CS\\d{4,6}"
