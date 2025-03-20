@@ -1,18 +1,17 @@
-Below is a professionally drafted email based on your input. The email communicates the discussed changes regarding trade case generation for Client Service and Ops, highlights the oversight during SIT/UAT, and seeks confirmation before implementing the logic.
+Subject: Q3 Feedback & Summary of My Contributions
 
-Subject: Confirmation Needed for Trade Case Generation Logic Implementation
-Dear [Recipient’s Name],
-I hope this email finds you well.
-As per our recent discussion, we have identified a requirement to generate trade cases with specific client service codes: “BC” for Client Service and “TD” for Ops. It’s surprising that this was not caught during SIT/UAT, and I apologize for the oversight on our part.
-To proceed, we plan to implement the following logic for trade case generation:
-	•	For Client Service: If the business function is “Trade” and the department is “CSG,” the client service code should be set to “BC.”
-	•	For Ops: The client service code should be set to “TD.”
-This logic is critical as the password management process will depend on these client service codes. Before we proceed with the implementation, I would appreciate your confirmation on the above approach. Additionally, if there are any other considerations or adjustments needed, please let me know.
-Once I receive your approval, we will implement the logic and ensure thorough testing to avoid any further surprises.
-Looking forward to your response.
-Best regards, [Your Full Name] [Your Job Title] [Your Contact Information]
-Please test the functionality for locking and unlocking in Activity. Let me explain how it works:
-	1.	If there are 2-3 assignments or tasks, and any content is locked by another user, you will not be able to access it.
-	2.	If you have two tasks (Task A and Task B) open in different windows, both can be accessed simultaneously. However, opening the same task in multiple windows is not allowed.
-	3.	If you perform all actions through the button, the lock/unlock process happens automatically in the background.
-	4.	If you open Task A and then close the entire browser, you will need to wait 15 minutes before reopening the same task. Currently, we have a 15-minute lock window, which may be extended later.
+Hi Sahil,
+
+I wanted to document my contributions for clear visibility and discussion.
+	•	In UAT, I handled testing for all listed domains individually, even when other domains had team support.
+	•	Apart from UAT, I actively contributed to SRs, CP bugs, and the development of common functionalities.
+	•	Developed Tranche 2 SSOPS SR and worked closely with Sugan and Arul, helping them with a ground-level understanding.
+	•	Supported the implementation of a CR in RD Recon for Sheetal.
+	•	Assisted the TW team with RD, CSD Project Ghana, and worked on a major change for PAK Aasan Installment, which is pending file review.
+	•	Worked as a Full Stack Developer, handling both frontend and backend responsibilities, while others in the same role focused individually on either frontend or backend.
+	•	Collaborated with the team whenever required and contributed wherever needed.
+
+I would also appreciate your input on any initiatives taken by other team members where I can contribute. Additionally, if you have any other feedback, including for Q3, feel free to share.
+
+Best,
+[Your Name]
