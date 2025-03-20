@@ -2,16 +2,20 @@ Subject: Q3 Feedback & Summary of My Contributions
 
 Hi Sahil,
 
-I wanted to document my contributions for clear visibility and discussion.
-	•	In UAT, I handled testing for all listed domains individually, even when other domains had team support.
-	•	Apart from UAT, I actively contributed to SRs, CP bugs, and the development of common functionalities.
-	•	Developed Tranche 2 SSOPS SR and worked closely with Sugan and Arul, helping them with a ground-level understanding.
-	•	Supported the implementation of a CR in RD Recon for Sheetal.
+I wanted to document my contributions for clear visibility and discussion, ensuring my efforts align with team and organizational goals.
+	•	In UAT, I handled testing for all listed domains individually, even when other domains had dedicated team support.
+	•	Beyond UAT, I actively contributed to SRs, CP bugs, and the development of common functionalities, ensuring smoother application performance.
+	•	Developed Tranche 2 SSOPS SR and collaborated with Sugan and Arul, helping them with a ground-level understanding and knowledge sharing.
+	•	Supported the implementation of a CR in RD Recon for Sheetal, ensuring successful integration.
 	•	Assisted the TW team with RD, CSD Project Ghana, and worked on a major change for PAK Aasan Installment, which is pending file review.
-	•	Worked as a Full Stack Developer, handling both frontend and backend responsibilities, while others in the same role focused individually on either frontend or backend.
-	•	Collaborated with the team whenever required and contributed wherever needed.
+	•	Worked as a Full Stack Developer, efficiently managing both frontend and backend responsibilities, whereas others in the same role focused individually on either frontend or backend.
+	•	Took ownership of critical modules, ensuring high-quality deliveries while mentoring and supporting the team whenever required.
+	•	Proactively identified gaps and potential improvements in the system, contributing to enhanced efficiency and performance.
+	•	Always ready to collaborate, assist, and take on additional responsibilities, reinforcing a leadership mindset within the team.
 
-I would also appreciate your input on any initiatives taken by other team members where I can contribute. Additionally, if you have any other feedback, including for Q3, feel free to share.
+I would also appreciate your input on any initiatives taken by other team members where I can contribute. Additionally, if you have any other feedback, including for Q3, please feel free to share.
+
+Looking forward to your guidance on how I can further align myself for greater responsibilities and growth within the organization.
 
 Best,
 [Your Name]
