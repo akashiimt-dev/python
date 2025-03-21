@@ -20,4 +20,149 @@ Looking forward to your guidance on how I can further align myself for greater r
 Best,
 [Your Name]
 
-"(SR|AC)-[A-Z]{2}-\\d{8}-CS\\d{4,6}"
+I understand you want to handle a disconnect scenario (like browser closing) where you need to:
+
+	1.	Trigger an API call to unlock a case
+	2.	Handle this in a disconnected callback
+	3.	Possibly redirect to a different button/page
+
+Here’s a sample implementation in JavaScript (assuming you’re using WebSocket or similar connection with Lit framework):
+
+import { LitElement, html } from 'lit';
+
+// Custom element class
+class MyComponent extends LitElement {
+  constructor() {
+    super();
+    this.handleDisconnect = this.handleDisconnect.bind(this);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    // Add event listeners when component connects
+    window.addEventListener('beforeunload', this.handleDisconnect);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Clean up event listeners and handle disconnect
+    this.handleDisconnect();
+    window.removeEventListener('beforeunload', this.handleDisconnect);
+  }
+
+  async handleDisconnect() {
+    try {
+      // API call to unlock case
+      await this.unlockCase();
+      // Navigate to different button/page after unlock
+      this.navigateToDifferentButton();
+    } catch (error) {
+      console.error('Error in disconnect handling:', error);
+    }
+  }
+
+  async unlockCase() {
+    // Your API call to unlock the case
+    const response = await fetch('your-api-endpoint/unlock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        caseId: this.caseId // Assuming you have caseId stored somewhere
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to unlock case');
+    }
+    
+    return await response.json();
+  }
+
+  navigateToDifferentButton() {
+    // Navigation logic - could be:
+    // 1. Using window.location
+    window.location.href = '/different-button-page';
+    
+    // OR 2. Dispatching a custom event if using a router
+    this.dispatchEvent(new CustomEvent('navigate', {
+      detail: { path: '/different-button' },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  render() {
+    return html`
+      <button @click=${() => this.someAction()}>Some Button</button>
+    `;
+  }
+}
+
+// Define the custom element
+customElements.define('my-component', MyComponent);
+
+For a more basic implementation without Lit:
+
+// Global disconnect handler
+async function handleDisconnect() {
+  try {
+    await unlockCase();
+    window.location.href = '/different-button-page';
+  } catch (error) {
+    console.error('Unlock failed:', error);
+  }
+}
+
+// Unlock case API call
+async function unlockCase() {
+  const response = await fetch('your-api-endpoint/unlock', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      caseId: 'your-case-id'
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('Unlock failed');
+  }
+  
+  return await response.json();
+}
+
+// Add event listeners
+window.addEventListener('beforeunload', (event) => {
+  // Note: Modern browsers limit what you can do in beforeunload
+  handleDisconnect();
+});
+
+// Optional: Handle manual disconnect
+document.getElementById('someButton').addEventListener('click', () => {
+  handleDisconnect();
+});
+
+Key points about this implementation:
+
+	1.	The beforeunload event catches browser closing scenarios
+	2.	disconnectedCallback in Lit handles component unmounting
+	3.	The unlock API call is made before navigation
+	4.	Error handling is included
+	5.	Navigation happens after successful unlock
+
+Important notes:
+
+	•	Replace 'your-api-endpoint/unlock' with your actual API endpoint
+	•	Add proper authentication if required
+	•	Store and pass the actual caseId
+	•	Modern browsers may restrict async operations in beforeunload
+	•	For reliable disconnect handling, you might want to:
+	•	Use WebSocket with a proper close handler
+	•	Implement a heartbeat mechanism
+	•	Use session management on the server
+
+Would you like me to modify this for a specific framework or add more details to any part?
+
