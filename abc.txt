@@ -185,4 +185,26 @@ I would also appreciate any insights on additional initiatives where I can contr
 Thank you for your time and support.
 
 Best regards,
-[Your Name]
+[Your 
+
+
+Q1 – Overview of My Key Contributions
+
+Dear Sahil,
+
+I hope this message finds you well. I wanted to take a moment to share a summary of my contributions during Q1, with the aim of ensuring clarity and alignment with our team and organizational goals.
+
+Here’s an overview of my key initiatives and achievements:
+
+	•	UAT Ownership: I took on independent management of testing for all listed BUs, ensuring thorough coverage even when other team members had dedicated support. Beyond UAT contributions, I actively contributed to service requests, bugs, and common functionality enhancements, helping to optimize overall application performance.
+	•	Tranche 2 SSOPS SR Development: I led the development efforts for this initiative, driving change requests, working closely with Suman and Arul to promote effective knowledge sharing and team collaboration, and ensuring a smooth and successful integration.
+	•	RD Recon CR Implementation: I supported the critical change request for RD Recon, contributing to a seamless rollout.
+	•	Cross-Project Collaboration: I assisted the TW team with RD and the PAK team with the Asian Installment project, playing a key role in the major change for PAK (currently pending full-stack development expertise). I also managed bot frontend and backend responsibilities, complementing the specialized focus of colleagues in their respective areas.
+	•	System Enhancements: I proactively identified gaps and potential improvements, contributing to increased efficiency and performance.
+	•	Collaboration & Initiative: I have consistently shown readiness to take on additional responsibilities, fostering a collaborative and leadership-oriented environment.
+
+I would greatly appreciate any insights or suggestions on additional initiatives where I can contribute further. Additionally, if you have any feedback on my Q3 performance or recommendations for future growth, I would be eager to hear your guidance.
+
+Thank you for taking the time to review this update, and for your continued support. I truly value your leadership and look forward to your thoughts.
+
+Warm regards,Akash Sharma
