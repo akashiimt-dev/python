@@ -221,3 +221,68 @@ public class WorkAssignment {
                     .orElse(null);
         } catch (
 
+
+import java.util.List;
+import java.util.Arrays;
+
+class WorkItem {
+    String status, userId;
+    WorkItem(String status, String userId) { this.status = status; this.userId = userId; }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+}
+
+public class WorkAssignment {
+    // Optimized function to get top userId
+    public static String getTopUserId(List<WorkItem> workList, List<WorkItem> workBasket) {
+        // Try finding pending in workList first
+        String userId = findFirstPending(workList);
+        if (userId != null) return userId;
+
+        // Then try workBasket for pending
+        userId = findFirstPending(workBasket);
+        if (userId != null) return userId;
+
+        // Fallback to any userId from workList
+        userId = findFirstAny(workList);
+        if (userId != null) return userId;
+
+        // Finally, any userId from workBasket
+        return findFirstAny(workBasket);
+    }
+
+    // Helper: Find first pending userId or null
+    private static String findFirstPending(List<WorkItem> items) {
+        return items.stream()
+                .filter(w -> "pending".equalsIgnoreCase(w.getStatus()))
+                .map(WorkItem::getUserId)
+                .findFirst()
+                .orElse(null);
+    }
+
+    // Helper: Find first userId (any status) or "None" if empty
+    private static String findFirstAny(List<WorkItem> items) {
+        return items.stream()
+                .map(WorkItem::getUserId)
+                .findFirst()
+                .orElse("None");
+    }
+
+    public static void main(String[] args) {
+        // Sample data
+        List<WorkItem> assignWorkList = Arrays.asList(
+            new WorkItem("completed", "user123"),
+            new WorkItem("inprogress", "user456")
+        );
+        List<WorkItem> assignWorkBasket = Arrays.asList(
+            new WorkItem("pending", "user789"),
+            new WorkItem("completed", "user101")
+        );
+
+        // Test
+        String userId = getTopUserId(assignWorkList, assignWorkBasket);
+        System.out.println("Selected User ID: " + userId);
+    }
+}
+
+
