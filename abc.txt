@@ -349,3 +349,134 @@ public class WorkAssignment {
     // Helper: Find first pending userId from WorkBasketItem
 
 
+import java.util.List;
+import java.util.Arrays;
+
+// Class for AssignWorkList items
+class WorkListItem {
+    String status, userId;
+    WorkListItem(String status, String userId) { this.status = status; this.userId = userId; }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+}
+
+// Class for AssignWorkBasket items
+class WorkBasketItem {
+    String status, userId;
+    WorkBasketItem(String status, String userId) { this.status = status; this.userId = userId; }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+}
+
+public class WorkAssignment {
+    // Function to get top userId from two different types
+    public static String getTopUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
+        try {
+            // If both lists are null, return "None"
+            if (workList == null && workBasket == null) return "None";
+
+            // Check pending in workList
+            String userId = findFirstPendingWorkList(workList);
+            if (userId != null) return userId;
+
+            // Check pending in workBasket
+            userId = findFirstPendingWorkBasket(workBasket);
+            if (userId != null) return userId;
+
+            // Fallback to any userId from workList
+            userId = findFirstAnyWorkList(workList);
+            if (userId != null) return userId;
+
+            // Fallback to any userId from workBasket
+            return findFirstAnyWorkBasket(workBasket);
+        } catch (Exception e) {
+            System.err.println("Error processing work lists: " + e.getMessage());
+            return "Error"; // Fallback for unexpected errors
+        }
+    }
+
+    // Helper: Find first pending userId from WorkListItem or null
+    private static String findFirstPendingWorkList(List<WorkListItem> items) {
+        if (items == null || items.isEmpty()) return null;
+        try {
+            return items.stream()
+                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
+                    .map(WorkListItem::getUserId)
+                    .filter(id -> id != null)
+                    .findFirst()
+                    .orElse(null);
+        } catch (NullPointerException e) {
+            return null; // Handle null issues gracefully
+        }
+    }
+
+    // Helper: Find first pending userId from WorkBasketItem or null
+    private static String findFirstPendingWorkBasket(List<WorkBasketItem> items) {
+        if (items == null || items.isEmpty()) return null;
+        try {
+            return items.stream()
+                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
+                    .map(WorkBasketItem::getUserId)
+                    .filter(id -> id != null)
+                    .findFirst()
+                    .orElse(null);
+        } catch (NullPointerException e) {
+            return null; // Handle null issues gracefully
+        }
+    }
+
+    // Helper: Find first userId (any status) from WorkListItem or "None"
+    private static String findFirstAnyWorkList(List<WorkListItem> items) {
+        if (items == null || items.isEmpty()) return "None";
+        try {
+            return items.stream()
+                    .filter(w -> w != null)
+                    .map(WorkListItem::getUserId)
+                    .filter(id -> id != null)
+                    .findFirst()
+                    .orElse("None");
+        } catch (NullPointerException e) {
+            return "None"; // Handle null issues gracefully
+        }
+    }
+
+    // Helper: Find first userId (any status) from WorkBasketItem or "None"
+    private static String findFirstAnyWorkBasket(List<WorkBasketItem> items) {
+        if (items == null || items.isEmpty()) return "None";
+        try {
+            return items.stream()
+                    .filter(w -> w != null)
+                    .map(WorkBasketItem::getUserId)
+                    .filter(id -> id != null)
+                    .findFirst()
+                    .orElse("None");
+        } catch (NullPointerException e) {
+            return "None"; // Handle null issues gracefully
+        }
+    }
+
+    public static void main(String[] args) {
+        // Sample data for AssignWorkList
+        List<WorkListItem> assignWorkList = Arrays.asList(
+            new WorkListItem("completed", "user123"),
+            null, // Simulate bad data
+            new WorkListItem("inprogress", "user456")
+        );
+
+        // Sample data for AssignWorkBasket
+        List<WorkBasketItem> assignWorkBasket = Arrays.asList(
+            new WorkBasketItem("pending", "user789"),
+            new WorkBasketItem("completed", null) // Simulate null userId
+        );
+
+        // Test with valid data
+        String userId = getTopUserId(assignWorkList, assignWorkBasket);
+        System.out.println("Selected User ID: " + userId);
+
+        // Test with null lists
+        userId = getTopUserId(null, null);
+        System.out.println("Selected User ID (null lists): " + userId);
+    }
+}
+
+
