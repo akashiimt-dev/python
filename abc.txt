@@ -139,3 +139,36 @@ I wanted to briefly discuss a recurring challenge with the 6 PM daily call:
 	•	I’m also open to any other suggestions you might have that could help accommodate this.
 
 I remain fully committed to my work and appreciate your understanding and support.
+
+
+import java.util.List;
+import java.util.Arrays;
+
+class Investigation {
+    String status, userId;
+    Investigation(String status, String userId) { this.status = status; this.userId = userId; }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+    @Override public String toString() { return "Status: " + status + ", UserID: " + userId; }
+}
+
+public class InvestigationFilter {
+    public static void main(String[] args) {
+        List<Investigation> investigations = Arrays.asList(
+            new Investigation("pending", "user123"),
+            new Investigation("completed", "user456"),
+            new Investigation("completed", "user789")
+        );
+
+        investigations.stream()
+            .filter(inv -> "pending".equals(inv.getStatus()))
+            .findAny()
+            .ifPresentOrElse(
+                inv -> investigations.forEach(i -> { if ("pending".equals(i.getStatus())) System.out.println(i); }),
+                () -> System.out.println("No pending. UserID: " + investigations.stream()
+                    .filter(inv -> "completed".equals(inv.getStatus()))
+                    .map(Investigation::getUserId)
+                    .findFirst().orElse("None"))
+            );
+    }
+}
