@@ -172,3 +172,52 @@ public class InvestigationFilter {
             );
     }
 }
+import java.util.List;
+import java.util.Arrays;
+
+class WorkItem {
+    String status, userId;
+    WorkItem(String status, String userId) { this.status = status; this.userId = userId; }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+}
+
+public class WorkAssignment {
+    // Function to get top userId with exception handling
+    public static String getTopUserId(List<WorkItem> workList, List<WorkItem> workBasket) {
+        try {
+            // Check if lists are null or empty
+            if (workList == null && workBasket == null) return "None";
+
+            // Try finding pending in workList
+            String userId = findFirstPending(workList);
+            if (userId != null) return userId;
+
+            // Then try workBasket for pending
+            userId = findFirstPending(workBasket);
+            if (userId != null) return userId;
+
+            // Fallback to any userId from workList
+            userId = findFirstAny(workList);
+            if (userId != null) return userId;
+
+            // Finally, any userId from workBasket
+            return findFirstAny(workBasket);
+        } catch (Exception e) {
+            System.err.println("Error processing work lists: " + e.getMessage());
+            return "Error"; // Fallback in case of unexpected issues
+        }
+    }
+
+    // Helper: Find first pending userId or null, with null safety
+    private static String findFirstPending(List<WorkItem> items) {
+        if (items == null || items.isEmpty()) return null;
+        try {
+            return items.stream()
+                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
+                    .map(WorkItem::getUserId)
+                    .filter(id -> id != null) // Avoid null userIds
+                    .findFirst()
+                    .orElse(null);
+        } catch (
+
