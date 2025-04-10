@@ -285,4 +285,67 @@ public class WorkAssignment {
     }
 }
 
+import java.util.List;
+import java.util.Arrays;
+
+// Class for AssignWorkList items
+class WorkListItem {
+    String status, userId;
+    WorkListItem(String status, String userId) { this.status = status; this.userId = userId; }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+}
+
+// Class for AssignWorkBasket items
+class WorkBasketItem {
+    String status, userId;
+    WorkBasketItem(String status, String userId) { this.status = status; this.userId = userId; }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+}
+
+public class WorkAssignment {
+    // Function to get top userId from two different types
+    public static String getTopUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
+        try {
+            // If both lists are null, return "None"
+            if (workList == null && workBasket == null) return "None";
+
+            // Check pending in workList
+            String userId = findFirstPendingWorkList(workList);
+            if (userId != null) return userId;
+
+            // Check pending in workBasket
+            userId = findFirstPendingWorkBasket(workBasket);
+            if (userId != null) return userId;
+
+            // Fallback to any userId from workList
+            userId = findFirstAnyWorkList(workList);
+            if (userId != null) return userId;
+
+            // Fallback to any userId from workBasket
+            return findFirstAnyWorkBasket(workBasket);
+        } catch (Exception e) {
+            System.err.println("Error processing work lists: " + e.getMessage());
+            return "Error"; // Fallback for unexpected errors
+        }
+    }
+
+    // Helper: Find first pending userId from WorkListItem or null
+    private static String findFirstPendingWorkList(List<WorkListItem> items) {
+        if (items == null || items.isEmpty()) return null;
+        try {
+            return items.stream()
+                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
+                    .map(WorkListItem::getUserId)
+                    .filter(id -> id != null)
+                    .findFirst()
+                    .orElse(null);
+        } catch (NullPointerException e) {
+            return null; // Handle null issues gracefully
+        }
+    }
+
+    // Helper: Find first pending userId from WorkBasketItem
+
 
