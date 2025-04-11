@@ -2,6 +2,8 @@ import java.util.List;
 import java.util.Arrays;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 // Class for WorkList items
 class WorkListItem {
@@ -32,82 +34,77 @@ class WorkBasketItem {
 }
 
 public class WorkAssignment {
-    // Function to get the userId of the last assigned task
+    // Optimized function to get the userId of the last assigned task
     public static String getLastAssignedUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
-        try {
-            // If both lists are null or empty, return "None"
-            if ((workList == null || workList.isEmpty()) && (workBasket == null || workBasket.isEmpty())) {
-                return "None";
-            }
-
-            // Step 1: Check for pending tasks in workList
-            String userId = findFirstPendingWorkList(workList);
-            if (userId != null) return userId;
-
-            // Step 2: Check for pending tasks in workBasket
-            userId = findFirstPendingWorkBasket(workBasket);
-            if (userId != null) return userId;
-
-            // Step 3: Find the most recent non-FMO task from either list
-            return findMostRecentNonFmoUserId(workList, workBasket);
-        } catch (Exception e) {
-            System.err.println("Error processing work lists: " + e.getMessage());
-            return "Error";
+        // Early return for both null/empty lists
+        if ((workList == null || workList.isEmpty()) && (workBasket == null || workBasket.isEmpty())) {
+            return "None";
         }
+
+        // Check for pending tasks first
+        return Stream.of(
+                findFirstPending(workList, WorkListItem::getStatus, WorkListItem::getUserId),
+                findFirstPending(workBasket, WorkBasketItem::getStatus, WorkBasketItem::getUserId)
+            )
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseGet(() -> findMostRecentFmoUserId(workList, workBasket));
     }
 
-    // Helper: Find first pending userId from WorkListItem or null
-    private static String findFirstPendingWorkList(List<WorkListItem> items) {
+    // Helper: Find first pending userId from a list
+    private static <T> String findFirstPending(List<T> items, java.util.function.Function<T, String> statusGetter,
+                                              java.util.function.Function<T, String> userIdGetter) {
         if (items == null || items.isEmpty()) return null;
         return items.stream()
-                .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()) && w.getUserId() != null)
+                .filter(item -> item != null && "pending".equalsIgnoreCase(statusGetter.apply(item))
+                        && userIdGetter.apply(item) != null)
+                .map(userIdGetter)
+                .findFirst()
+                .orElse(null);
+    }
+
+    // Helper: Find the userId of the most recent FMO task
+    private static String findMostRecentFmoUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
+        // Stream WorkListItem for FMO tasks
+        String workListResult = workList != null ? workList.stream()
+                .filter(item -> item != null && "FMO".equalsIgnoreCase(item.getStatus())
+                        && item.getUserId() != null && item.getCreatedOn() != null)
+                .max(Comparator.comparing(WorkListItem::getCreatedOn))
                 .map(WorkListItem::getUserId)
-                .findFirst()
-                .orElse(null);
-    }
+                .orElse(null) : null;
 
-    // Helper: Find first pending userId from WorkBasketItem or null
-    private static String findFirstPendingWorkBasket(List<WorkBasketItem> items) {
-        if (items == null || items.isEmpty()) return null;
-        return items.stream()
-                .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()) && w.getUserId() != null)
+        // Stream WorkBasketItem for FMO tasks
+        String workBasketResult = workBasket != null ? workBasket.stream()
+                .filter(item -> item != null && "FMO".equalsIgnoreCase(item.getStatus())
+                        && item.getUserId() != null && item.getCreatedOn() != null)
+                .max(Comparator.comparing(WorkBasketItem::getCreatedOn))
                 .map(WorkBasketItem::getUserId)
-                .findFirst()
-                .orElse(null);
-    }
+                .orElse(null) : null;
 
-    // Helper: Find the userId of the most recent non-FMO task
-    private static String findMostRecentNonFmoUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
-        LocalDateTime latestTime = null;
-        String latestUserId = null;
-
-        // Check workList for non-FMO tasks
-        if (workList != null && !workList.isEmpty()) {
-            for (WorkListItem item : workList) {
-                if (item != null && item.getStatus() != null && !item.getStatus().equalsIgnoreCase("FMO")
-                        && item.getUserId() != null && item.getCreatedOn() != null) {
-                    if (latestTime == null || item.getCreatedOn().isAfter(latestTime)) {
-                        latestTime = item.getCreatedOn();
-                        latestUserId = item.getUserId();
-                    }
-                }
-            }
+        // If both are null, return "None"
+        if (workListResult == null && workBasketResult == null) {
+            return "None";
         }
 
-        // Check workBasket for non-FMO tasks
-        if (workBasket != null && !workBasket.isEmpty()) {
-            for (WorkBasketItem item : workBasket) {
-                if (item != null && item.getStatus() != null && !item.getStatus().equalsIgnoreCase("FMO")
-                        && item.getUserId() != null && item.getCreatedOn() != null) {
-                    if (latestTime == null || item.getCreatedOn().isAfter(latestTime)) {
-                        latestTime = item.getCreatedOn();
-                        latestUserId = item.getUserId();
-                    }
-                }
-            }
-        }
+        // Compare createdOn to determine the most recent
+        LocalDateTime workListTime = workListResult != null && workList != null ? workList.stream()
+                .filter(item -> item != null && workListResult.equals(item.getUserId()))
+                .map(WorkListItem::getCreatedOn)
+                .filter(Objects::nonNull)
+                .max(Comparator.naturalOrder())
+                .orElse(null) : null;
 
-        return latestUserId != null ? latestUserId : "None";
+        LocalDateTime workBasketTime = workBasketResult != null && workBasket != null ? workBasket.stream()
+                .filter(item -> item != null && workBasketResult.equals(item.getUserId()))
+                .map(WorkBasketItem::getCreatedOn)
+                .filter(Objects::nonNull)
+                .max(Comparator.naturalOrder())
+                .orElse(null) : null;
+
+        if (workListTime != null && (workBasketTime == null || workListTime.isAfter(workBasketTime))) {
+            return workListResult;
+        }
+        return workBasketResult != null ? workBasketResult : "None";
     }
 
     // Main method for testing
@@ -115,40 +112,40 @@ public class WorkAssignment {
         // Test case 1: WorkBasket empty, pending task in workList
         List<WorkListItem> workList1 = Arrays.asList(
                 new WorkListItem("pending", "User1", LocalDateTime.now().minusDays(1)),
-                new WorkListItem("investigation", "User2", LocalDateTime.now().minusDays(2))
+                new WorkListItem("FMO", "User2", LocalDateTime.now().minusDays(2))
         );
         List<WorkBasketItem> workBasket1 = null;
-        System.out.println("Test 1 (WorkBasket empty): " + getLastAssignedUserId(workList1, workBasket1)); // Expected: User1
+        System.out.println("Test 1 (WorkBasket empty, pending): " + getLastAssignedUserId(workList1, workBasket1)); // Expected: User1
 
-        // Test case 2: WorkList empty, most recent in workBasket
+        // Test case 2: WorkList empty, FMO in workBasket
         List<WorkListItem> workList2 = null;
         List<WorkBasketItem> workBasket2 = Arrays.asList(
-                new WorkBasketItem("reinvestigation", "User3", LocalDateTime.now().minusDays(1)),
-                new WorkBasketItem("FMO", "User4", LocalDateTime.now().minusDays(2))
+                new WorkBasketItem("FMO", "User3", LocalDateTime.now().minusDays(1)),
+                new WorkBasketItem("investigation", "User4", LocalDateTime.now().minusDays(2))
         );
-        System.out.println("Test 2 (WorkList empty): " + getLastAssignedUserId(workList2, workBasket2)); // Expected: User3
+        System.out.println("Test 2 (WorkList empty, FMO): " + getLastAssignedUserId(workList2, workBasket2)); // Expected: User3
 
         // Test case 3: Both lists empty
         List<WorkListItem> workList3 = null;
         List<WorkBasketItem> workBasket3 = null;
         System.out.println("Test 3 (Both empty): " + getLastAssignedUserId(workList3, workBasket3)); // Expected: None
 
-        // Test case 4: WorkList has pending, WorkBasket non-empty
+        // Test case 4: WorkList has pending, WorkBasket has FMO
         List<WorkListItem> workList4 = Arrays.asList(
                 new WorkListItem("pending", "User5", LocalDateTime.now().minusDays(3))
         );
         List<WorkBasketItem> workBasket4 = Arrays.asList(
-                new WorkBasketItem("reinvestigation", "User6", LocalDateTime.now().minusDays(1))
+                new WorkBasketItem("FMO", "User6", LocalDateTime.now().minusDays(1))
         );
         System.out.println("Test 4 (Pending in WorkList): " + getLastAssignedUserId(workList4, workBasket4)); // Expected: User5
 
-        // Test case 5: WorkList has older tasks, WorkBasket has newer
+        // Test case 5: No pending, FMO in both lists
         List<WorkListItem> workList5 = Arrays.asList(
-                new WorkListItem("investigation", "User7", LocalDateTime.now().minusDays(5))
+                new WorkListItem("FMO", "User7", LocalDateTime.now().minusDays(5))
         );
         List<WorkBasketItem> workBasket5 = Arrays.asList(
-                new WorkBasketItem("reinvestigation", "User8", LocalDateTime.now().minusDays(1))
+                new WorkBasketItem("FMO", "User8", LocalDateTime.now().minusDays(1))
         );
-        System.out.println("Test 5 (Newer in WorkBasket): " + getLastAssignedUserId(workList5, workBasket5)); // Expected: User8
+        System.out.println("Test 5 (FMO in both): " + getLastAssignedUserId(workList5, workBasket5)); // Expected: User8
     }
 }
