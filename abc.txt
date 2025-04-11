@@ -1,482 +1,154 @@
-I’ll provide detailed notes on exception handling in Java, including concepts, scenarios, and examples with JVM-level insights.
-Exception Handling in Java: Detailed Notes
-1. What is an Exception?
-An exception is an event that disrupts the normal flow of a program’s execution. It occurs during runtime due to unexpected conditions like invalid input, resource unavailability, or programming errors. In Java, exceptions are objects derived from the Throwable class, which has two subclasses:
-	•	Error: Represents serious problems that a reasonable application should not try to catch (e.g., OutOfMemoryError, StackOverflowError).
-	•	Exception: Represents conditions that a program might want to catch (e.g., IOException, NullPointerException).
-2. Exception Handling Mechanism
-Java uses a structured mechanism to handle exceptions with the following keywords:
-	•	try: Defines a block of code that will be monitored for exceptions.
-	•	catch: Handles the exception thrown in the try block.
-	•	finally: Executes code regardless of whether an exception occurs (e.g., cleanup operations).
-	•	throw: Explicitly throws an exception.
-	•	throws: Declares that a method can throw one or more exceptions.
-3. How Exceptions Work at the JVM Level
-When an exception occurs:
-	1	The JVM creates an exception object containing details like the exception type, message, and stack trace.
-	2	The JVM searches the call stack (from the current method backward) for an appropriate exception handler (catch block).
-	3	If no handler is found in the current method, the exception propagates up the call stack.
-	4	If no handler is found in the entire stack, the JVM terminates the program and prints the stack trace.
-4. Exception Hierarchy
-	•	Checked Exceptions: Must be handled or declared (e.g., IOException, SQLException). Checked at compile-time.
-	•	Unchecked Exceptions: Subclasses of RuntimeException (e.g., NullPointerException, ArrayIndexOutOfBoundsException). Not checked at compile-time.
-5. Common Exception Scenarios
-Here are some real-world scenarios with examples:
-Scenario 1: NullPointerException (Unchecked)
-	•	Cause: Attempting to access a method or field of a null object.
-	•	JVM Behavior: The JVM detects a null reference and throws a NullPointerException.
-	•	Example:
-public class NullPointerDemo {
-    public static void main(String[] args) {
-        String str = null;
-        try {
-            System.out.println(str.length()); // Null reference access
-        } catch (NullPointerException e) {
-            System.out.println("Caught: " + e);
-            e.printStackTrace(); // Prints stack trace
-        }
-    }
-}
-	•	JVM-Level Insight: When str.length() is called, the JVM checks the object reference. Since str is null, it constructs a NullPointerException object and throws it, interrupting the normal bytecode execution.
-Scenario 2: ArithmeticException (Unchecked)
-	•	Cause: Division by zero or invalid arithmetic operation.
-	•	JVM Behavior: The JVM detects the invalid operation during bytecode execution and throws an ArithmeticException.
-	•	Example:
-public class ArithmeticDemo {
-    public static void main(String[] args) {
-        int a = 10, b = 0;
-        try {
-            int result = a / b; // Division by zero
-        } catch (ArithmeticException e) {
-            System.out.println("Caught: " + e);
-        }
-    }
-}
-	•	JVM-Level Insight: During the execution of the idiv (integer division) bytecode, the JVM checks the divisor. If it’s zero, it creates an ArithmeticException and halts normal execution.
-Scenario 3: IOException (Checked)
-	•	Cause: Failure in I/O operations (e.g., file not found).
-	•	JVM Behavior: The JVM delegates the exception throwing to the underlying native method (e.g., file system calls).
-	•	Example:
-import java.io.*;
-public class IODemo {
-    public static void main(String[] args) {
-        try {
-            FileReader file = new FileReader("nonexistent.txt");
-        } catch (FileNotFoundException e) {
-            System.out.println("Caught: " + e);
-        } finally {
-            System.out.println("Cleanup in finally block");
-        }
-    }
-}
-	•	JVM-Level Insight: The JVM invokes a native method for file access. If the file doesn’t exist, the native code signals an error, and the JVM wraps it in a FileNotFoundException object.
-Scenario 4: Custom Exception
-	•	Cause: User-defined condition.
-	•	JVM Behavior: The JVM treats it like any other exception once thrown.
-	•	Example:
-class InsufficientBalanceException extends Exception {
-    public InsufficientBalanceException(String message) {
-        super(message);
-    }
-}
-
-public class CustomExceptionDemo {
-    public static void withdraw(int balance, int amount) throws InsufficientBalanceException {
-        if (amount > balance) {
-            throw new InsufficientBalanceException("Balance too low: " + balance);
-        }
-    }
-
-    public static void main(String[] args) {
-        try {
-            withdraw(100, 150);
-        } catch (InsufficientBalanceException e) {
-            System.out.println("Caught: " + e);
-        }
-    }
-}
-	•	JVM-Level Insight: When throw is executed, the JVM creates an instance of InsufficientBalanceException, attaches the message, and searches the stack for a matching catch block.
-6. Real-World Scenarios
-	•	Database Connection Failure: A SQLException might occur if the database server is down. The JVM propagates this from the JDBC driver.
-	•	File Processing: Reading a large file might throw OutOfMemoryError if the heap space is insufficient. The JVM’s garbage collector fails to allocate memory, triggering the error.
-	•	Network Timeout: An SocketTimeoutException occurs during a network call. The JVM relies on the underlying OS to signal the timeout.
-7. Best Practices
-	•	Catch specific exceptions rather than a generic Exception.
-	•	Use finally for resource cleanup (e.g., closing files or connections).
-	•	Avoid returning from a finally block as it can suppress exceptions.
-	•	Log exceptions with stack traces for debugging.
-8. JVM Stack Trace Example
-When an exception occurs, the JVM prints a stack trace:
-java.lang.NullPointerException
-    at NullPointerDemo.main(NullPointerDemo.java:6)
-	•	Line 1: Exception type and message (if any).
-	•	Line 2: Method, class, file, and line number where the exception occurred.
-9. Multi-Catch and Try-with-Resources
-	•	Multi-Catch (Java 7+):
-try {
-    // Code that might throw IOException or SQLException
-} catch (IOException | SQLException e) {
-    System.out.println("Caught: " + e);
-}
-	•	Try-with-Resources (Java 7+):
-try (FileReader fr = new FileReader("file.txt")) {
-    // Use file
-} catch (IOException e) {
-    System.out.println("Caught: " + e);
-}
-	•	JVM Insight: The JVM ensures resources are closed automatically by invoking the close() method, even if an exception occurs.
-
-This covers the essentials of exception handling in Java with JVM-level details. Let me know if you’d like deeper exploration of any specific aspect!
-
-
-I wanted to briefly discuss a recurring challenge with the 6 PM daily call:
-	•	I’ve recently enrolled in a professional upskilling session that begins at 7 PM.
-	•	Balancing both the call and the session every day has been a bit difficult.
-	•	I can manage the current schedule occasionally (once or twice a week), but daily is proving challenging.
-	•	To help manage this better, I’d like to propose:
-	•	Leaving the office by 5 PM and attending the call from home.
-	•	Or, shifting the call slightly earlier if that works for the team.
-	•	I’m also open to any other suggestions you might have that could help accommodate this.
-
-I remain fully committed to my work and appreciate your understanding and support.
-
-
 import java.util.List;
 import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 
-class Investigation {
+// Class for WorkList items
+class WorkListItem {
     String status, userId;
-    Investigation(String status, String userId) { this.status = status; this.userId = userId; }
-    String getStatus() { return status; }
-    String getUserId() { return userId; }
-    @Override public String toString() { return "Status: " + status + ", UserID: " + userId; }
-}
-
-public class InvestigationFilter {
-    public static void main(String[] args) {
-        List<Investigation> investigations = Arrays.asList(
-            new Investigation("pending", "user123"),
-            new Investigation("completed", "user456"),
-            new Investigation("completed", "user789")
-        );
-
-        investigations.stream()
-            .filter(inv -> "pending".equals(inv.getStatus()))
-            .findAny()
-            .ifPresentOrElse(
-                inv -> investigations.forEach(i -> { if ("pending".equals(i.getStatus())) System.out.println(i); }),
-                () -> System.out.println("No pending. UserID: " + investigations.stream()
-                    .filter(inv -> "completed".equals(inv.getStatus()))
-                    .map(Investigation::getUserId)
-                    .findFirst().orElse("None"))
-            );
+    LocalDateTime createdOn;
+    WorkListItem(String status, String userId, LocalDateTime createdOn) {
+        this.status = status;
+        this.userId = userId;
+        this.createdOn = createdOn;
     }
-}
-import java.util.List;
-import java.util.Arrays;
-
-class WorkItem {
-    String status, userId;
-    WorkItem(String status, String userId) { this.status = status; this.userId = userId; }
     String getStatus() { return status; }
     String getUserId() { return userId; }
+    LocalDateTime getCreatedOn() { return createdOn; }
+}
+
+// Class for WorkBasket items
+class WorkBasketItem {
+    String status, userId;
+    LocalDateTime createdOn;
+    WorkBasketItem(String status, String userId, LocalDateTime createdOn) {
+        this.status = status;
+        this.userId = userId;
+        this.createdOn = createdOn;
+    }
+    String getStatus() { return status; }
+    String getUserId() { return userId; }
+    LocalDateTime getCreatedOn() { return createdOn; }
 }
 
 public class WorkAssignment {
-    // Function to get top userId with exception handling
-    public static String getTopUserId(List<WorkItem> workList, List<WorkItem> workBasket) {
+    // Function to get the userId of the last assigned task
+    public static String getLastAssignedUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
         try {
-            // Check if lists are null or empty
-            if (workList == null && workBasket == null) return "None";
+            // If both lists are null or empty, return "None"
+            if ((workList == null || workList.isEmpty()) && (workBasket == null || workBasket.isEmpty())) {
+                return "None";
+            }
 
-            // Try finding pending in workList
-            String userId = findFirstPending(workList);
+            // Step 1: Check for pending tasks in workList
+            String userId = findFirstPendingWorkList(workList);
             if (userId != null) return userId;
 
-            // Then try workBasket for pending
-            userId = findFirstPending(workBasket);
+            // Step 2: Check for pending tasks in workBasket
+            userId = findFirstPendingWorkBasket(workBasket);
             if (userId != null) return userId;
 
-            // Fallback to any userId from workList
-            userId = findFirstAny(workList);
-            if (userId != null) return userId;
-
-            // Finally, any userId from workBasket
-            return findFirstAny(workBasket);
+            // Step 3: Find the most recent non-FMO task from either list
+            return findMostRecentNonFmoUserId(workList, workBasket);
         } catch (Exception e) {
             System.err.println("Error processing work lists: " + e.getMessage());
-            return "Error"; // Fallback in case of unexpected issues
+            return "Error";
         }
     }
 
-    // Helper: Find first pending userId or null, with null safety
-    private static String findFirstPending(List<WorkItem> items) {
+    // Helper: Find first pending userId from WorkListItem or null
+    private static String findFirstPendingWorkList(List<WorkListItem> items) {
         if (items == null || items.isEmpty()) return null;
-        try {
-            return items.stream()
-                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
-                    .map(WorkItem::getUserId)
-                    .filter(id -> id != null) // Avoid null userIds
-                    .findFirst()
-                    .orElse(null);
-        } catch (
-
-
-import java.util.List;
-import java.util.Arrays;
-
-class WorkItem {
-    String status, userId;
-    WorkItem(String status, String userId) { this.status = status; this.userId = userId; }
-    String getStatus() { return status; }
-    String getUserId() { return userId; }
-}
-
-public class WorkAssignment {
-    // Optimized function to get top userId
-    public static String getTopUserId(List<WorkItem> workList, List<WorkItem> workBasket) {
-        // Try finding pending in workList first
-        String userId = findFirstPending(workList);
-        if (userId != null) return userId;
-
-        // Then try workBasket for pending
-        userId = findFirstPending(workBasket);
-        if (userId != null) return userId;
-
-        // Fallback to any userId from workList
-        userId = findFirstAny(workList);
-        if (userId != null) return userId;
-
-        // Finally, any userId from workBasket
-        return findFirstAny(workBasket);
-    }
-
-    // Helper: Find first pending userId or null
-    private static String findFirstPending(List<WorkItem> items) {
         return items.stream()
-                .filter(w -> "pending".equalsIgnoreCase(w.getStatus()))
-                .map(WorkItem::getUserId)
+                .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()) && w.getUserId() != null)
+                .map(WorkListItem::getUserId)
                 .findFirst()
                 .orElse(null);
-    }
-
-    // Helper: Find first userId (any status) or "None" if empty
-    private static String findFirstAny(List<WorkItem> items) {
-        return items.stream()
-                .map(WorkItem::getUserId)
-                .findFirst()
-                .orElse("None");
-    }
-
-    public static void main(String[] args) {
-        // Sample data
-        List<WorkItem> assignWorkList = Arrays.asList(
-            new WorkItem("completed", "user123"),
-            new WorkItem("inprogress", "user456")
-        );
-        List<WorkItem> assignWorkBasket = Arrays.asList(
-            new WorkItem("pending", "user789"),
-            new WorkItem("completed", "user101")
-        );
-
-        // Test
-        String userId = getTopUserId(assignWorkList, assignWorkBasket);
-        System.out.println("Selected User ID: " + userId);
-    }
-}
-
-import java.util.List;
-import java.util.Arrays;
-
-// Class for AssignWorkList items
-class WorkListItem {
-    String status, userId;
-    WorkListItem(String status, String userId) { this.status = status; this.userId = userId; }
-    String getStatus() { return status; }
-    String getUserId() { return userId; }
-}
-
-// Class for AssignWorkBasket items
-class WorkBasketItem {
-    String status, userId;
-    WorkBasketItem(String status, String userId) { this.status = status; this.userId = userId; }
-    String getStatus() { return status; }
-    String getUserId() { return userId; }
-}
-
-public class WorkAssignment {
-    // Function to get top userId from two different types
-    public static String getTopUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
-        try {
-            // If both lists are null, return "None"
-            if (workList == null && workBasket == null) return "None";
-
-            // Check pending in workList
-            String userId = findFirstPendingWorkList(workList);
-            if (userId != null) return userId;
-
-            // Check pending in workBasket
-            userId = findFirstPendingWorkBasket(workBasket);
-            if (userId != null) return userId;
-
-            // Fallback to any userId from workList
-            userId = findFirstAnyWorkList(workList);
-            if (userId != null) return userId;
-
-            // Fallback to any userId from workBasket
-            return findFirstAnyWorkBasket(workBasket);
-        } catch (Exception e) {
-            System.err.println("Error processing work lists: " + e.getMessage());
-            return "Error"; // Fallback for unexpected errors
-        }
-    }
-
-    // Helper: Find first pending userId from WorkListItem or null
-    private static String findFirstPendingWorkList(List<WorkListItem> items) {
-        if (items == null || items.isEmpty()) return null;
-        try {
-            return items.stream()
-                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
-                    .map(WorkListItem::getUserId)
-                    .filter(id -> id != null)
-                    .findFirst()
-                    .orElse(null);
-        } catch (NullPointerException e) {
-            return null; // Handle null issues gracefully
-        }
-    }
-
-    // Helper: Find first pending userId from WorkBasketItem
-
-
-import java.util.List;
-import java.util.Arrays;
-
-// Class for AssignWorkList items
-class WorkListItem {
-    String status, userId;
-    WorkListItem(String status, String userId) { this.status = status; this.userId = userId; }
-    String getStatus() { return status; }
-    String getUserId() { return userId; }
-}
-
-// Class for AssignWorkBasket items
-class WorkBasketItem {
-    String status, userId;
-    WorkBasketItem(String status, String userId) { this.status = status; this.userId = userId; }
-    String getStatus() { return status; }
-    String getUserId() { return userId; }
-}
-
-public class WorkAssignment {
-    // Function to get top userId from two different types
-    public static String getTopUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
-        try {
-            // If both lists are null, return "None"
-            if (workList == null && workBasket == null) return "None";
-
-            // Check pending in workList
-            String userId = findFirstPendingWorkList(workList);
-            if (userId != null) return userId;
-
-            // Check pending in workBasket
-            userId = findFirstPendingWorkBasket(workBasket);
-            if (userId != null) return userId;
-
-            // Fallback to any userId from workList
-            userId = findFirstAnyWorkList(workList);
-            if (userId != null) return userId;
-
-            // Fallback to any userId from workBasket
-            return findFirstAnyWorkBasket(workBasket);
-        } catch (Exception e) {
-            System.err.println("Error processing work lists: " + e.getMessage());
-            return "Error"; // Fallback for unexpected errors
-        }
-    }
-
-    // Helper: Find first pending userId from WorkListItem or null
-    private static String findFirstPendingWorkList(List<WorkListItem> items) {
-        if (items == null || items.isEmpty()) return null;
-        try {
-            return items.stream()
-                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
-                    .map(WorkListItem::getUserId)
-                    .filter(id -> id != null)
-                    .findFirst()
-                    .orElse(null);
-        } catch (NullPointerException e) {
-            return null; // Handle null issues gracefully
-        }
     }
 
     // Helper: Find first pending userId from WorkBasketItem or null
     private static String findFirstPendingWorkBasket(List<WorkBasketItem> items) {
         if (items == null || items.isEmpty()) return null;
-        try {
-            return items.stream()
-                    .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()))
-                    .map(WorkBasketItem::getUserId)
-                    .filter(id -> id != null)
-                    .findFirst()
-                    .orElse(null);
-        } catch (NullPointerException e) {
-            return null; // Handle null issues gracefully
-        }
+        return items.stream()
+                .filter(w -> w != null && "pending".equalsIgnoreCase(w.getStatus()) && w.getUserId() != null)
+                .map(WorkBasketItem::getUserId)
+                .findFirst()
+                .orElse(null);
     }
 
-    // Helper: Find first userId (any status) from WorkListItem or "None"
-    private static String findFirstAnyWorkList(List<WorkListItem> items) {
-        if (items == null || items.isEmpty()) return "None";
-        try {
-            return items.stream()
-                    .filter(w -> w != null)
-                    .map(WorkListItem::getUserId)
-                    .filter(id -> id != null)
-                    .findFirst()
-                    .orElse("None");
-        } catch (NullPointerException e) {
-            return "None"; // Handle null issues gracefully
+    // Helper: Find the userId of the most recent non-FMO task
+    private static String findMostRecentNonFmoUserId(List<WorkListItem> workList, List<WorkBasketItem> workBasket) {
+        LocalDateTime latestTime = null;
+        String latestUserId = null;
+
+        // Check workList for non-FMO tasks
+        if (workList != null && !workList.isEmpty()) {
+            for (WorkListItem item : workList) {
+                if (item != null && item.getStatus() != null && !item.getStatus().equalsIgnoreCase("FMO")
+                        && item.getUserId() != null && item.getCreatedOn() != null) {
+                    if (latestTime == null || item.getCreatedOn().isAfter(latestTime)) {
+                        latestTime = item.getCreatedOn();
+                        latestUserId = item.getUserId();
+                    }
+                }
+            }
         }
+
+        // Check workBasket for non-FMO tasks
+        if (workBasket != null && !workBasket.isEmpty()) {
+            for (WorkBasketItem item : workBasket) {
+                if (item != null && item.getStatus() != null && !item.getStatus().equalsIgnoreCase("FMO")
+                        && item.getUserId() != null && item.getCreatedOn() != null) {
+                    if (latestTime == null || item.getCreatedOn().isAfter(latestTime)) {
+                        latestTime = item.getCreatedOn();
+                        latestUserId = item.getUserId();
+                    }
+                }
+            }
+        }
+
+        return latestUserId != null ? latestUserId : "None";
     }
 
-    // Helper: Find first userId (any status) from WorkBasketItem or "None"
-    private static String findFirstAnyWorkBasket(List<WorkBasketItem> items) {
-        if (items == null || items.isEmpty()) return "None";
-        try {
-            return items.stream()
-                    .filter(w -> w != null)
-                    .map(WorkBasketItem::getUserId)
-                    .filter(id -> id != null)
-                    .findFirst()
-                    .orElse("None");
-        } catch (NullPointerException e) {
-            return "None"; // Handle null issues gracefully
-        }
-    }
-
+    // Main method for testing
     public static void main(String[] args) {
-        // Sample data for AssignWorkList
-        List<WorkListItem> assignWorkList = Arrays.asList(
-            new WorkListItem("completed", "user123"),
-            null, // Simulate bad data
-            new WorkListItem("inprogress", "user456")
+        // Test case 1: WorkBasket empty, pending task in workList
+        List<WorkListItem> workList1 = Arrays.asList(
+                new WorkListItem("pending", "User1", LocalDateTime.now().minusDays(1)),
+                new WorkListItem("investigation", "User2", LocalDateTime.now().minusDays(2))
         );
+        List<WorkBasketItem> workBasket1 = null;
+        System.out.println("Test 1 (WorkBasket empty): " + getLastAssignedUserId(workList1, workBasket1)); // Expected: User1
 
-        // Sample data for AssignWorkBasket
-        List<WorkBasketItem> assignWorkBasket = Arrays.asList(
-            new WorkBasketItem("pending", "user789"),
-            new WorkBasketItem("completed", null) // Simulate null userId
+        // Test case 2: WorkList empty, most recent in workBasket
+        List<WorkListItem> workList2 = null;
+        List<WorkBasketItem> workBasket2 = Arrays.asList(
+                new WorkBasketItem("reinvestigation", "User3", LocalDateTime.now().minusDays(1)),
+                new WorkBasketItem("FMO", "User4", LocalDateTime.now().minusDays(2))
         );
+        System.out.println("Test 2 (WorkList empty): " + getLastAssignedUserId(workList2, workBasket2)); // Expected: User3
 
-        // Test with valid data
-        String userId = getTopUserId(assignWorkList, assignWorkBasket);
-        System.out.println("Selected User ID: " + userId);
+        // Test case 3: Both lists empty
+        List<WorkListItem> workList3 = null;
+        List<WorkBasketItem> workBasket3 = null;
+        System.out.println("Test 3 (Both empty): " + getLastAssignedUserId(workList3, workBasket3)); // Expected: None
 
-        // Test with null lists
-        userId = getTopUserId(null, null);
-        System.out.println("Selected User ID (null lists): " + userId);
+        // Test case 4: WorkList has pending, WorkBasket non-empty
+        List<WorkListItem> workList4 = Arrays.asList(
+                new WorkListItem("pending", "User5", LocalDateTime.now().minusDays(3))
+        );
+        List<WorkBasketItem> workBasket4 = Arrays.asList(
+                new WorkBasketItem("reinvestigation", "User6", LocalDateTime.now().minusDays(1))
+        );
+        System.out.println("Test 4 (Pending in WorkList): " + getLastAssignedUserId(workList4, workBasket4)); // Expected: User5
+
+        // Test case 5: WorkList has older tasks, WorkBasket has newer
+        List<WorkListItem> workList5 = Arrays.asList(
+                new WorkListItem("investigation", "User7", LocalDateTime.now().minusDays(5))
+        );
+        List<WorkBasketItem> workBasket5 = Arrays.asList(
+                new WorkBasketItem("reinvestigation", "User8", LocalDateTime.now().minusDays(1))
+        );
+        System.out.println("Test 5 (Newer in WorkBasket): " + getLastAssignedUserId(workList5, workBasket5)); // Expected: User8
     }
 }
-
-
