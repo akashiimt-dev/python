@@ -1,0 +1,30 @@
+WITH CombinedTasks AS (
+    SELECT operator_id, status, instructions, create_on
+    FROM assign_work_list
+    WHERE instructions IN ('investigation', 'reinvestigation')
+    UNION ALL
+    SELECT operator_id, status, instructions, create_on
+    FROM work_basket
+    WHERE instructions IN ('investigation', 'reinvestigation')
+),
+PendingTasks AS (
+    SELECT operator_id, create_on
+    FROM CombinedTasks
+    WHERE status = 'pending'
+    ORDER BY create_on DESC
+    LIMIT 1
+),
+CompletedTasks AS (
+    SELECT operator_id, create_on
+    FROM CombinedTasks
+    WHERE status = 'complete'
+    ORDER BY create_on DESC
+    LIMIT 1
+)
+SELECT operator_id, create_on
+FROM PendingTasks
+UNION ALL
+SELECT operator_id, create_on
+FROM CompletedTasks
+WHERE NOT EXISTS (SELECT 1 FROM PendingTasks)
+LIMIT 1;
