@@ -257,4 +257,38 @@ public class AssignmentService {
             );
             hasActiveLocks.set(
                     lockedWorkListTasks.stream()
-                            .
+                            .anyMatch(task -> isTaskStillActive(task.getLockedOn()))
+            );
+            lockedWorkListTasks.stream()
+                    .filter(task -> isTaskStillActive(task.getLockedOn()))
+                    .findFirst()
+                    .ifPresent(task -> lockedByRef.set(task.getLockedBy()));
+        }
+
+        // Check WorkBasket tasks
+        if (!lockedWorkBasketTasks.isEmpty()) {
+            String firstBasketLockingUser = lockedWorkBasketTasks.get(0).getLockedBy();
+            if (lockingUser.get() == null) {
+                lockingUser.set(firstBasketLockingUser);
+            }
+            boolean allBasketTasksSameUser = lockedWorkBasketTasks.stream()
+                    .allMatch(task -> firstBasketLockingUser.equals(task.getLockedBy()));
+            allTasksLockedBySameUser.set(
+                    allTasksLockedBySameUser.get() &&
+                            allBasketTasksSameUser &&
+                            (lockingUser.get() == null || lockingUser.get().equals(firstBasketLockingUser))
+            );
+            hasActiveLocks.set(
+                    hasActiveLocks.get() ||
+                            lockedWorkBasketTasks.stream()
+                                    .anyMatch(task -> isTaskStillActive(task.getLockedOn()))
+            );
+            if (!hasActiveLocks.get() || lockedByRef.get() == null) {
+                lockedWorkBasketTasks.stream()
+                        .filter(task -> isTaskStillActive(task.getLockedOn()))
+                        .findFirst()
+                        .ifPresent(task -> lockedByRef.set(task.getLockedBy()));
+            }
+        }
+
+        // Step 6: If all tasks are locked by the same user and that user is the current user, allow
