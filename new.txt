@@ -291,4 +291,118 @@ public class AssignmentService {
             }
         }
 
-        // Step 6: If all tasks are locked by the same user and that user is the current user, allow
+        // Step 6: If all tasks are locked by the same user and that user is the current user, allow locking
+        if (hasActiveLocks.get() && allTasksLockedBySameUser.get() && userId.equals(lockingUser.get())) {
+            return lockAssignment(activityCase, workListTask, workBasketTask, userId);
+        }
+
+        // Step 7: If any task is actively locked by a different user, reject the request
+        if (hasActiveLocks.get()) {
+            return "Case has an active lock by " + lockedByRef.get() + ". Try again later.";
+        }
+
+        // Step 8: Check if all locks are inactive (older than 30 minutes) using streams
+        boolean allLocksInactive = workListTasks.stream()
+                .filter(task -> task.getLockedBy() != null)
+                .allMatch(task -> isTaskInactiveFor30Minutes(task.getLockedOn(), now))
+                && workBasketTasks.stream()
+                .filter(task -> task.getLockedBy() != null)
+                .allMatch(task -> isTaskInactiveFor30Minutes(task.getLockedOn(), now));
+
+        // Step 9: Unlock inactive tasks if all are inactive
+        if (allLocksInactive) {
+            workListTasks.forEach(task -> {
+                if (task.getLockedBy() != null) {
+                    task.setLockedBy(null);
+                    task.setLockedOn(null);
+                    try {
+                        entityManager.merge(task);
+                    } catch (PersistenceException e) {
+                        // Ignore if columns don't exist
+                    }
+                }
+            });
+            workBasketTasks.forEach(task -> {
+                if (task.getLockedBy() != null) {
+                    task.setLockedBy(null);
+                    task.setLockedOn(null);
+                    try {
+                        entityManager.merge(task);
+                    } catch (PersistenceException e) {
+                        // Ignore if columns don't exist
+                    }
+                }
+            });
+        }
+
+        // Step 10: Check if the requested task is already locked
+        boolean isRequestedTaskLocked = (workListTask != null && workListTask.getLockedBy() != null) ||
+                (workBasketTask != null && workBasketTask.getLockedBy() != null);
+
+        // Step 11: If no active locks and requested task is not locked, lock it
+        if (!hasActiveLocks.get() && !isRequestedTaskLocked) {
+            return lockAssignment(activityCase, workListTask, workBasketTask, userId);
+        }
+
+        // Step 12: If requested task is already locked or conditions not met, return without locking
+        return "Task locking conditions not met or task is already locked.";
+    }
+
+    private boolean isTaskStillActive(LocalDateTime lockedOn) {
+        if (lockedOn == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+        Duration duration = Duration.between(lockedOn, now);
+        return duration.toMinutes() <= 30; // Used in openAssignment
+    }
+
+    private boolean isTaskStillActiveWithin15Minutes(LocalDateTime lockedOn) {
+        if (lockedOn == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+        Duration duration = Duration.between(lockedOn, now);
+        return duration.toMinutes() <= 15; // Used in isCaseLocked
+    }
+
+    private boolean isTaskInactiveFor30Minutes(LocalDateTime lockedOn, LocalDateTime now) {
+        if (lockedOn == null) {
+            return true; // Treat null as inactive
+        }
+        Duration duration = Duration.between(lockedOn, now);
+        return duration.toMinutes() > 30;
+    }
+
+    private String lockAssignment(ActivityCase activityCase, WorkList workListTask, WorkBasket workBasketTask, String userId) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
+        // Lock the ActivityCase
+        activityCase.setLockedStatus("LOCKED");
+        activityCase.setLockedBy(userId);
+        activityCase.setLockedOpname("OpenAssignment");
+        activityCase.setLockedOn(now);
+        try {
+            entityManager.merge(activityCase);
+        } catch (PersistenceException e) {
+            return "Error updating ActivityCase lock: " + e.getMessage();
+        }
+
+        // Lock the specific task in WorkList or WorkBasket
+        try {
+            if (workListTask != null) {
+                workListTask.setLockedBy(userId);
+                workListTask.setLockedOn(now);
+                entityManager.merge(workListTask);
+            } else if (workBasketTask != null) {
+                workBasketTask.setLockedBy(userId);
+                workBasketTask.setLockedOn(now);
+                entityManager.merge(workBasketTask);
+            }
+        } catch (PersistenceException e) {
+            // Ignore if locked_by/locked_on columns don't exist; ActivityCase lock is sufficient
+        }
+
+        return "Task locked successfully for user " + userId;
+    }
+}
