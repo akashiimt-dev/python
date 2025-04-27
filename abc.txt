@@ -1,8 +1,1 @@
-// JPQL query to find a contact ID by email, ensuring exactly one contact and one client contact record
-SELECT c.id                         -- Select the contact ID from the Contact table
-FROM Contact c                     -- From the Contact table (aliased as 'c')
-INNER JOIN ClientContact cc        -- Join with ClientContact table (aliased as 'cc')
-    ON cc.contactId = c.id         -- Match ClientContact's contactId with Contact's id
-WHERE c.email = :email             -- Filter for the provided email address
-GROUP BY c.id                      -- Group by contact ID to aggregate ClientContact records
-HAVING COUNT(cc.contactId) = 1     -- Ensure exactly one ClientContact record exists
+https://assess.wecreateproblems.com/quizzes/9ac8df1a-983e-4f69-b77f-e63e32d52cfd
