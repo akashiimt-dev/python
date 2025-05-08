@@ -1,158 +1,186 @@
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
-public class SBClient {
-    private final AttachmentService attachmentService;
-    private final AssignmentLockedService assignmentLockedService;
-    private final ContactService contactService;
-    private final AtomTaskListDataRetriever atomTaskListDataRetriever;
+// WorkBasket Entity
+@Entity(name = "work_basket")
+public class WorkBasket {
 
-    public SBClient(AttachmentService attachmentService, 
-                    AssignmentLockedService assignmentLockedService, 
-                    ContactService contactService, 
-                    AtomTaskListDataRetriever atomTaskListDataRetriever) {
-        this.attachmentService = attachmentService;
-        this.assignmentLockedService = assignmentLockedService;
-        this.contactService = contactService;
-        this.atomTaskListDataRetriever = atomTaskListDataRetriever;
-    }
+    @jakarta.persistence.Id
+    @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private Long id;
 
-    // Custom exception for timeout
-    public static class CaseProcessingTimeoutException extends RuntimeException {
-        public CaseProcessingTimeoutException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
+    @jakarta.persistence.Column(name = "case_id")
+    private String caseId;
 
-    public CompletableFuture<Map<String, Object>> processCase(String caseId) {
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+    @jakarta.persistence.Column(name = "flow_type")
+    private String flowType;
 
-        // Define all async tasks with timeouts
-        CompletableFuture<List<Attachment>> attachmentFuture = CompletableFuture.supplyAsync(() ->
-            attachmentService.findByCaseIdAndReferenceId(caseId, "case"), executor)
-            .orTimeout(5, TimeUnit.SECONDS);
+    @jakarta.persistence.Column(name = "assign_operator_id")
+    private String assignOperatorId;
 
-        CompletableFuture<Boolean> isCaseLockedFuture = CompletableFuture.supplyAsync(() ->
-            assignmentLockedService.isCaseLocked(caseId), executor)
-            .orTimeout(5, TimeUnit.SECONDS);
+    @jakarta.persistence.Column(name = "active")
+    private String active;
 
-        CompletableFuture<ActivityCase> activityCaseFuture = CompletableFuture.supplyAsync(() -> {
-            // Simulate activity case retrieval
-            return new ActivityCase(); // Replace with actual logic
-        }, executor)
-            .orTimeout(5, TimeUnit.SECONDS);
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-        CompletableFuture<List<OutgoingEmail>> outgoingEmailFuture = CompletableFuture.supplyAsync(() -> {
-            // Simulate outgoing email retrieval
-            return new ArrayList<>(); // Replace with actual logic
-        }, executor)
-            .orTimeout(5, TimeUnit.SECONDS);
+    public String getCaseId() { return caseId; }
+    public void setCaseId(String caseId) { this.caseId = caseId; }
 
-        // Placeholder for other futures (e.g., complaintLinkDetails, etc.)
-        CompletableFuture<Contact> contactFuture = activityCaseFuture.thenCompose(activityCase ->
-            CompletableFuture.supplyAsync(() ->
-                contactService.findByContactId(activityCase.getClientContactId()), executor)
-                .orTimeout(5, TimeUnit.SECONDS)
-        );
+    public String getFlowType() { return flowType; }
+    public void setFlowType(String flowType) { this.flowType = flowType; }
 
-        CompletableFuture<List<Contact>> contactListFuture = activityCaseFuture.thenCompose(activityCase ->
-            CompletableFuture.supplyAsync(() ->
-                contactService.findByClientId(activityCase.getClientId()), executor)
-                .orTimeout(5, TimeUnit.SECONDS)
-        );
+    public String getAssignOperatorId() { return assignOperatorId; }
+    public void setAssignOperatorId(String assignOperatorId) { this.assignOperatorId = assignOperatorId; }
 
-        CompletableFuture<List<CaseContentDataRetriever>> caseContentFuture = CompletableFuture.supplyAsync(() ->
-            atomTaskListDataRetriever.retrieveAllAtomTasksFromTheAtomWorkflow(), executor)
-            .orTimeout(5, TimeUnit.SECONDS);
-
-        // Collect all futures
-        List<CompletableFuture<?>> allFuturesList = Arrays.asList(
-            attachmentFuture, isCaseLockedFuture, activityCaseFuture, outgoingEmailFuture,
-            contactFuture, contactListFuture, caseContentFuture
-        );
-
-        // Wait for all futures to complete
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(allFuturesList.toArray(new CompletableFuture[0]));
-
-        // Collect results and handle exceptions
-        return allFutures.thenApply(v -> {
-            // Check for any failed futures
-            for (CompletableFuture<?> future : allFuturesList) {
-                if (future.isCompletedExceptionally()) {
-                    try {
-                        future.join(); // This will throw the exception
-                    } catch (CompletionException e) {
-                        throw new CaseProcessingTimeoutException("One or more tasks timed out or failed for caseId: " + caseId, e.getCause());
-                    }
-                }
-            }
-
-            // If all futures completed successfully, collect results
-            Map<String, Object> results = new HashMap<>();
-            results.put("attachments", attachmentFuture.join());
-            results.put("isCaseLocked", isCaseLockedFuture.join());
-            results.put("activityCase", activityCaseFuture.join());
-            results.put("outgoingEmails", outgoingEmailFuture.join());
-            results.put("contact", contactFuture.join());
-            results.put("contactList", contactListFuture.join());
-            results.put("caseContent", caseContentFuture.join());
-            return results;
-        }).whenComplete((result, throwable) -> {
-            executor.shutdown(); // Clean up executor
-        });
-    }
-
-    // Placeholder classes for context
-    static class ActivityCase {
-        String getClientContactId() { return "contactId"; }
-        String getClientId() { return "clientId"; }
-    }
-
-    static class AttachmentService {
-        List<Attachment> findByCaseIdAndReferenceId(String caseId, String referenceId) {
-            try {
-                Thread.sleep(6000); // Simulate timeout
-                return new ArrayList<>();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    static class AssignmentLockedService {
-        boolean isCaseLocked(String caseId) { return false; }
-    }
-
-    static class ContactService {
-        Contact findByContactId(String contactId) { return new Contact(); }
-        List<Contact> findByClientId(String clientId) { return new ArrayList<>(); }
-    }
-
-    static class AtomTaskListDataRetriever {
-        List<CaseContentDataRetriever> retrieveAllAtomTasksFromTheAtomWorkflow() {
-            return new ArrayList<>();
-        }
-    }
-
-    static class Contact {}
-    static class Attachment {}
-    static class CaseContentDataRetriever {}
-
-    public static void main(String[] args) {
-        SBClient client = new SBClient(new AttachmentService(), new AssignmentLockedService(),
-                                      new ContactService(), new AtomTaskListDataRetriever());
-        CompletableFuture<Map<String, Object>> future = client.processCase("case123");
-        future.thenAccept(System.out::println)
-              .exceptionally(throwable -> {
-                  System.err.println("Error: " + throwable.getMessage());
-                  return null;
-              });
-
-        try {
-            Thread.sleep(7000); // Keep main thread alive
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    public String getActive() { return active; }
+    public void setActive(String active) { this.active = active; }
 }
+
+// WorkList Entity
+@Entity(name = "work_list")
+public class WorkList {
+
+    @jakarta.persistence.Id
+    @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private Long id;
+
+    @jakarta.persistence.Column(name = "case_id")
+    private String caseId;
+
+    @jakarta.persistence.Column(name = "flow_type")
+    private String flowType;
+
+    @jakarta.persistence.Column(name = "assign_operator_id")
+    private String assignOperatorId;
+
+    @jakarta.persistence.Column(name = "active")
+    private String active;
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getCaseId() { return caseId; }
+    public void setCaseId(String caseId) { this.caseId = caseId; }
+
+    public String getFlowType() { return flowType; }
+    public void setFlowType(String flowType) { this.flowType = flowType; }
+
+    public String getAssignOperatorId() { return assignOperatorId; }
+    public void setAssignOperatorId(String assignOperatorId) { this.assignOperatorId = assignOperatorId; }
+
+    public String getActive() { return active; }
+    public void setActive(String active) { this.active = active; }
+}
+
+// Service Class
+@ApplicationScoped
+public class WorkFlowService {
+
+    @Inject
+    EntityManager entityManager;
+
+    @Transactional
+    public Response processWorkItems(List<WorkBasket> workBasketItems) {
+        try {
+            if (workBasketItems == null || workBasketItems.isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Work basket items list is empty or null")
+                        .build();
+            }
+
+            // Step 1: Validate flow_type and extract step/id asynchronously
+            Map<WorkBasket, String[]> validatedItems = new HashMap<>();
+            List<CompletableFuture<Void>> validationFutures = workBasketItems.stream()
+                    .map(item -> CompletableFuture.runAsync(() -> {
+                        if (item.getFlowType() == null || !isValidFlowType(item.getFlowType())) {
+                            throw new IllegalArgumentException("Invalid flow_type: " + item.getFlowType());
+                        }
+                        String step = extractStep(item.getFlowType());
+                        String id = extractId(item.getFlowType());
+                        if (step == null || id == null) {
+                            throw new IllegalArgumentException("Step or ID missing in flow_type: " + item.getFlowType());
+                        }
+                        synchronized (validatedItems) {
+                            validatedItems.put(item, new String[]{step, id});
+                        }
+                    }))
+                    .collect(Collectors.toList());
+
+            CompletableFuture.allOf(validationFutures.toArray(new CompletableFuture[0])).join();
+            if (validatedItems.isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Validation failed for all items").build();
+            }
+
+            // Step 2: Fetch all relevant WorkBasket and WorkList entries in parallel
+            List<String> caseIds = workBasketItems.stream()
+                    .map(WorkBasket::getCaseId)
+                    .distinct()
+                    .collect(Collectors.toList());
+            List<String> flowTypes = workBasketItems.stream()
+                    .map(WorkBasket::getFlowType)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            CompletableFuture<List<WorkBasket>> basketFuture = CompletableFuture.supplyAsync(() -> {
+                TypedQuery<WorkBasket> basketQuery = entityManager.createQuery(
+                        "SELECT wb FROM work_basket wb WHERE wb.caseId IN :caseIds AND wb.flowType IN :flowTypes AND wb.active = :active",
+                        WorkBasket.class);
+                basketQuery.setParameter("caseIds", caseIds);
+                basketQuery.setParameter("flowTypes", flowTypes);
+                basketQuery.setParameter("active", "Y");
+                return basketQuery.getResultList();
+            });
+
+            CompletableFuture<List<WorkList>> listFuture = CompletableFuture.supplyAsync(() -> {
+                TypedQuery<WorkList> listQuery = entityManager.createQuery(
+                        "SELECT wl FROM work_list wl WHERE wl.caseId IN :caseIds AND wl.flowType IN :flowTypes AND wl.active = :active",
+                        WorkList.class);
+                listQuery.setParameter("caseIds", caseIds);
+                listQuery.setParameter("flowTypes", flowTypes);
+                listQuery.setParameter("active", "Y");
+                return listQuery.getResultList();
+            });
+
+            CompletableFuture.allOf(basketFuture, listFuture).join();
+            List<WorkBasket> basketEntries = basketFuture.get();
+            List<WorkList> listEntries = listFuture.get();
+
+            // Step 3: Index entries for quick lookup
+            Map<String, WorkBasket> basketMap = new HashMap<>();
+            for (WorkBasket entry : basketEntries) {
+                String key = entry.getCaseId() + "|" + entry.getFlowType();
+                basketMap.put(key, entry);
+            }
+
+            Map<String, WorkList> listMap = new HashMap<>();
+            for (WorkList entry : listEntries) {
+                String key = entry.getCaseId() + "|" + entry.getFlowType();
+                listMap.put(key, entry);
+            }
+
+            // Step 4: Process items with batching and parallelism
+            int batchSize = 100;
+            List<CompletableFuture<Void>> processFutures = validatedItems.entrySet().stream()
+                    .collect(Collectors.groupingBy(e -> Math.floorDiv(e.getKey().hashCode(), batchSize)))
+                    .values().stream()
+                    .map(batch -> CompletableFuture.runAsync(() -> {
+                        for (Map.Entry<WorkBasket, String[]> entry : batch) {
+                            WorkBasket item = entry.getKey();
+                            String[] stepAndId = entry.getValue();
+                            String step = stepAndId[0];
+                            String id = stepAndId[1];
+                            String key = item.getCaseId()
