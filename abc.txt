@@ -1,1 +1,301 @@
-https://docs.google.com/forms/d/e/1FAIpQLSfQ2S-43ag4FWDlVz4N1XhzfeXow2AXA7_hg76SeUWCAYqoBQ/viewform?usp=sf_linke63e32d52cfd
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
+
+// WorkBasket Entity
+@Entity(name = "work_basket")
+public class WorkBasket {
+
+    @jakarta.persistence.Id
+    @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private Long id;
+
+    @jakarta.persistence.Column(name = "case_id")
+    private String caseId;
+
+    @jakarta.persistence.Column(name = "flow_type")
+    private String flowType;
+
+    @jakarta.persistence.Column(name = "assign_operator_id")
+    private String assignOperatorId;
+
+    @jakarta.persistence.Column(name = "active")
+    private String active;
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getCaseId() { return caseId; }
+    public void setCaseId(String caseId) { this.caseId = caseId; }
+
+    public String getFlowType() { return flowType; }
+    public void setFlowType(String flowType) { this.flowType = flowType; }
+
+    public String getAssignOperatorId() { return assignOperatorId; }
+    public void setAssignOperatorId(String assignOperatorId) { this.assignOperatorId = assignOperatorId; }
+
+    public String getActive() { return active; }
+    public void setActive(String active) { this.active = active; }
+}
+
+// WorkList Entity
+@Entity(name = "work_list")
+public class WorkList {
+
+    @jakarta.persistence.Id
+    @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private Long id;
+
+    @jakarta.persistence.Column(name = "case_id")
+    private String caseId;
+
+    @jakarta.persistence.Column(name = "flow_type")
+    private String flowType;
+
+    @jakarta.persistence.Column(name = "assign_operator_id")
+    private String assignOperatorId;
+
+    @jakarta.persistence.Column(name = "active")
+    private String active;
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getCaseId() { return caseId; }
+    public void setCaseId(String caseId) { this.caseId = caseId; }
+
+    public String getFlowType() { return flowType; }
+    public void setFlowType(String flowType) { this.flowType = flowType; }
+
+    public String getAssignOperatorId() { return assignOperatorId; }
+    public void setAssignOperatorId(String assignOperatorId) { this.assignOperatorId = assignOperatorId; }
+
+    public String getActive() { return active; }
+    public void setActive(String active) { this.active = active; }
+}
+
+// DTO to hold combined results
+public class WorkItemResponse {
+    private List<WorkBasket> workBasketItems;
+    private List<WorkList> workListItems;
+
+    public WorkItemResponse(List<WorkBasket> workBasketItems, List<WorkList> workListItems) {
+        this.workBasketItems = workBasketItems;
+        this.workListItems = workListItems;
+    }
+
+    public List<WorkBasket> getWorkBasketItems() { return workBasketItems; }
+    public List<WorkList> getWorkListItems() { return workListItems; }
+}
+
+// Service Class
+@ApplicationScoped
+public class WorkFlowService {
+
+    private static final Logger logger = LoggerFactory.getLogger(WorkFlowService.class);
+
+    @Inject
+    EntityManager entityManager;
+
+    // Custom ExecutorService with a thread pool sized to CPU cores
+    private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    @Transactional
+    public Response processWorkflow(String step, String id) {
+        if (step == null || id == null) {
+            logger.error("Invalid input: step or id is null");
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Step and id are required parameters")
+                    .build();
+        }
+
+        try {
+            // Step 1: Fetch and process WorkBasket entries using native SQL with JSON filtering
+            CompletableFuture<List<WorkBasket>> basketFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    List<WorkBasket> results = new ArrayList<>();
+                    javax.persistence.Query nativeQuery = entityManager.createNativeQuery(
+                            "SELECT id, case_id, flow_type, assign_operator_id, active " +
+                            "FROM work_basket WHERE active = 'Y' AND flow_type::jsonb->0->>'step' = :step AND flow_type::jsonb->0->>'id' = :id",
+                            WorkBasket.class);
+                    nativeQuery.setParameter("step", step);
+                    nativeQuery.setParameter("id", id);
+                    results.addAll(nativeQuery.getResultList());
+                    return results;
+                } catch (Exception e) {
+                    logger.error("Database error fetching WorkBasket: {}", e.getMessage(), e);
+                    throw new RuntimeException("Failed to fetch WorkBasket entries", e);
+                }
+            }, executorService);
+
+            // Step 2: Fetch and process WorkList entries using native SQL with JSON filtering
+            CompletableFuture<List<WorkList>> listFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    List<WorkList> results = new ArrayList<>();
+                    javax.persistence.Query nativeQuery = entityManager.createNativeQuery(
+                            "SELECT id, case_id, flow_type, assign_operator_id, active " +
+                            "FROM work_list WHERE active = 'Y' AND flow_type::jsonb->0->>'step' = :step AND flow_type::jsonb->0->>'id' = :id",
+                            WorkList.class);
+                    nativeQuery.setParameter("step", step);
+                    nativeQuery.setParameter("id", id);
+                    results.addAll(nativeQuery.getResultList());
+                    return results;
+                } catch (Exception e) {
+                    logger.error("Database error fetching WorkList: {}", e.getMessage(), e);
+                    throw new RuntimeException("Failed to fetch WorkList entries", e);
+                }
+            }, executorService);
+
+            // Wait for both fetches to complete
+            CompletableFuture.allOf(basketFuture, listFuture).join();
+            List<WorkBasket> basketEntries = basketFuture.get();
+            List<WorkList> listEntries = listFuture.get();
+
+            // Step 3: Process entries
+            CompletableFuture<Void> processFuture = CompletableFuture.runAsync(() -> {
+                try {
+                    for (WorkBasket basketEntry : basketEntries) {
+                        // Case 1: Found in work_basket
+                        basketEntry.setActive("N");
+                        entityManager.merge(basketEntry);
+
+                        WorkList newWorkListItem = new WorkList();
+                        newWorkListItem.setCaseId(basketEntry.getCaseId());
+                        newWorkListItem.setFlowType(basketEntry.getFlowType());
+                        newWorkListItem.setAssignOperatorId(generateNewOperatorId());
+                        newWorkListItem.setActive("Y");
+                        entityManager.persist(newWorkListItem);
+                    }
+
+                    // Case 2: Check work_list if no work_basket match
+                    if (basketEntries.isEmpty() && !listEntries.isEmpty()) {
+                        for (WorkList listEntry : listEntries) {
+                            listEntry.setAssignOperatorId(generateNewOperatorId());
+                            entityManager.merge(listEntry);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Error processing workflow entries: {}", e.getMessage(), e);
+                    throw new RuntimeException("Failed to process workflow entries", e);
+                }
+            }, executorService);
+
+            processFuture.join();
+
+            // Final flush
+            entityManager.flush();
+            entityManager.clear();
+
+            return Response.ok("Workflow processed successfully").build();
+
+        } catch (ExecutionException e) {
+            logger.error("Execution exception in workflow processing: {}", e.getCause().getMessage(), e.getCause());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Workflow processing failed: " + e.getCause().getMessage())
+                    .build();
+        } catch (InterruptedException e) {
+            logger.error("Workflow processing interrupted: {}", e.getMessage(), e);
+            Thread.currentThread().interrupt(); // Restore interrupted status
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Workflow processing interrupted: " + e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            logger.error("Unexpected error in workflow processing: {}", e.getMessage(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Unexpected error: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @Transactional
+    public CompletableFuture<Response> fetchWorkItemsByCaseId(String caseId) {
+        if (caseId == null) {
+            logger.error("Invalid input: caseId is null");
+            return CompletableFuture.completedFuture(
+                    Response.status(Response.Status.BAD_REQUEST)
+                            .entity("caseId is a required parameter")
+                            .build());
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                // Step 1: Fetch WorkBasket entries using native SQL
+                CompletableFuture<List<WorkBasket>> basketFuture = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        List<WorkBasket> results = new ArrayList<>();
+                        javax.persistence.Query basketQuery = entityManager.createNativeQuery(
+                                "SELECT id, case_id, flow_type, assign_operator_id, active FROM work_basket WHERE case_id = :caseId",
+                                WorkBasket.class);
+                        basketQuery.setParameter("caseId", caseId);
+                        results.addAll(basketQuery.getResultList());
+                        return results;
+                    } catch (Exception e) {
+                        logger.error("Database error fetching WorkBasket: {}", e.getMessage(), e);
+                        throw new RuntimeException("Failed to fetch WorkBasket entries", e);
+                    }
+                }, executorService);
+
+                // Step 2: Fetch WorkList entries using native SQL
+                CompletableFuture<List<WorkList>> listFuture = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        List<WorkList> results = new ArrayList<>();
+                        javax.persistence.Query listQuery = entityManager.createNativeQuery(
+                                "SELECT id, case_id, flow_type, assign_operator_id, active FROM work_list WHERE case_id = :caseId",
+                                WorkList.class);
+                        listQuery.setParameter("caseId", caseId);
+                        results.addAll(listQuery.getResultList());
+                        return results;
+                    } catch (Exception e) {
+                        logger.error("Database error fetching WorkList: {}", e.getMessage(), e);
+                        throw new RuntimeException("Failed to fetch WorkList entries", e);
+                    }
+                }, executorService);
+
+                // Wait for both fetches to complete
+                CompletableFuture.allOf(basketFuture, listFuture).join();
+                List<WorkBasket> basketEntries = basketFuture.get();
+                List<WorkList> listEntries = listFuture.get();
+
+                // Step 3: Combine results into a DTO
+                WorkItemResponse responseDto = new WorkItemResponse(basketEntries, listEntries);
+
+                return Response.ok(responseDto).build();
+
+            } catch (ExecutionException e) {
+                logger.error("Execution exception in fetch: {}", e.getCause().getMessage(), e.getCause());
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Fetch failed: " + e.getCause().getMessage())
+                        .build();
+            } catch (InterruptedException e) {
+                logger.error("Fetch interrupted: {}", e.getMessage(), e);
+                Thread.currentThread().interrupt(); // Restore interrupted status
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Fetch interrupted: " + e.getMessage())
+                        .build();
+            } catch (Exception e) {
+                logger.error("Unexpected error in fetch: {}", e.getMessage(), e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Unexpected error: " + e.getMessage())
+                        .build();
+            }
+        }, executorService);
+    }
+
+    private String generateNewOperatorId() {
+        return "OPR_" + System.currentTimeMillis(); // Example implementation
+    }
+}
