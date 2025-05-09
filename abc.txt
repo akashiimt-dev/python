@@ -6,13 +6,13 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 // WorkBasket Entity
 @Entity(name = "work_basket")
@@ -115,34 +115,37 @@ public class WorkFlowService {
     private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     @Transactional
-    public Response processWorkflow(String step, String id) {
+    public Response processWorkflow(List<WorkBasket> workBasketItems, String step, String id) {
         if (step == null || id == null) {
             logger.error("Invalid input: step or id is null");
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Step and id are required parameters")
                     .build();
         }
+        if (workBasketItems == null) {
+            logger.error("Invalid input: workBasketItems is null");
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("WorkBasket items list cannot be null")
+                    .build();
+        }
 
         try {
-            // Step 1: Fetch and process WorkBasket entries using native SQL with JSON filtering
-            CompletableFuture<List<WorkBasket>> basketFuture = CompletableFuture.supplyAsync(() -> {
+            // Step 1: Filter WorkBasket entries based on step and id in flow_type
+            CompletableFuture<List<WorkBasket>> filterFuture = CompletableFuture.supplyAsync(() -> {
                 try {
-                    List<WorkBasket> results = new ArrayList<>();
-                    javax.persistence.Query nativeQuery = entityManager.createNativeQuery(
-                            "SELECT id, case_id, flow_type, assign_operator_id, active " +
-                            "FROM work_basket WHERE active = 'Y' AND flow_type::jsonb->0->>'step' = :step AND flow_type::jsonb->0->>'id' = :id",
-                            WorkBasket.class);
-                    nativeQuery.setParameter("step", step);
-                    nativeQuery.setParameter("id", id);
-                    results.addAll(nativeQuery.getResultList());
-                    return results;
+                    return workBasketItems.stream()
+                            .filter(item -> item.getActive() != null && item.getActive().equals("Y"))
+                            .filter(item -> flowTypeContains(item.getFlowType(), step, id))
+                            .collect(Collectors.toList());
                 } catch (Exception e) {
-                    logger.error("Database error fetching WorkBasket: {}", e.getMessage(), e);
-                    throw new RuntimeException("Failed to fetch WorkBasket entries", e);
+                    logger.error("Error filtering WorkBasket items: {}", e.getMessage(), e);
+                    throw new RuntimeException("Failed to filter WorkBasket items", e);
                 }
             }, executorService);
 
-            // Step 2: Fetch and process WorkList entries using native SQL with JSON filtering
+            List<WorkBasket> filteredBasketEntries = filterFuture.get();
+
+            // Step 2: Fetch WorkList entries if no matches in WorkBasket
             CompletableFuture<List<WorkList>> listFuture = CompletableFuture.supplyAsync(() -> {
                 try {
                     List<WorkList> results = new ArrayList<>();
@@ -160,16 +163,13 @@ public class WorkFlowService {
                 }
             }, executorService);
 
-            // Wait for both fetches to complete
-            CompletableFuture.allOf(basketFuture, listFuture).join();
-            List<WorkBasket> basketEntries = basketFuture.get();
             List<WorkList> listEntries = listFuture.get();
 
             // Step 3: Process entries
             CompletableFuture<Void> processFuture = CompletableFuture.runAsync(() -> {
                 try {
-                    for (WorkBasket basketEntry : basketEntries) {
-                        // Case 1: Found in work_basket
+                    for (WorkBasket basketEntry : filteredBasketEntries) {
+                        // Case 1: Found in work_basket input list
                         basketEntry.setActive("N");
                         entityManager.merge(basketEntry);
 
@@ -181,8 +181,8 @@ public class WorkFlowService {
                         entityManager.persist(newWorkListItem);
                     }
 
-                    // Case 2: Check work_list if no work_basket match
-                    if (basketEntries.isEmpty() && !listEntries.isEmpty()) {
+                    // Case 2: Check work_list if no matches in filtered WorkBasket
+                    if (filteredBasketEntries.isEmpty() && !listEntries.isEmpty()) {
                         for (WorkList listEntry : listEntries) {
                             listEntry.setAssignOperatorId(generateNewOperatorId());
                             entityManager.merge(listEntry);
@@ -295,7 +295,21 @@ public class WorkFlowService {
         }, executorService);
     }
 
+    private boolean flowTypeContains(String flowType, String step, String id) {
+        try {
+            return flowType != null && flowType.contains("\"step\":\"" + step + "\"") && flowType.contains("\"id\":\"" + id + "\"");
+        } catch (Exception e) {
+            logger.error("Error checking flow_type for step: {} and id: {} - {}", step, id, e.getMessage(), e);
+            return false;
+        }
+    }
+
     private String generateNewOperatorId() {
-        return "OPR_" + System.currentTimeMillis(); // Example implementation
+        try {
+            return "OPR_" + System.currentTimeMillis();
+        } catch (Exception e) {
+            logger.error("Error generating new operator ID: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate new operator ID", e);
+        }
     }
 }
