@@ -1,10 +1,8 @@
-const historyVal = `
-  From: ${rowData.from}
-  To: ${rowData.to}
-  CC: ${rowData.cc}
-  BCC: ${rowData.bcc}
-  Date: ${rowData.receivedSentOn}
-  ${getCountryTime(rowData.receivedSentOn, this.caseOrgCountry)}
-  Subject: ${rowData.subject}
-  Processed Email History
-`;
+hope this email finds you well. Following our recent discussion regarding Card 400’s new plans, I understand there are updates to the 0% interest offerings. Specifically, we now have multiple plans under this scheme, and the narration provided in the comments for these 0% plans needs to be processed accordingly.
+This change requires a shift in our current approach to ensure accurate and efficient processing. To address this, I propose the following steps:
+1.  Review Narration Details: Establish a standardized process to extract and categorize the narration from comments for each 0% plan to ensure clarity and consistency.
+2.  Update Processing Workflow: Modify our existing workflow to accommodate the multiple plans, ensuring the system aligns with the specific narration instructions for each.
+3.  Team Training: Conduct a brief training session for the team to familiarize them with the new plans and the updated processing requirements.
+4.  Testing and Validation: Run a pilot test with a small batch of transactions to validate the updated process before full implementation.
+Please let me know your thoughts on this approach or if you have additional suggestions to streamline the process. I’m happy to discuss further or make adjustments as needed.
+Looking forward to your feedback.
