@@ -1,12 +1,10 @@
-Steps to Analyze Assignment of Review Email:
-	1.	Check if the incoming email exists:
-	•	Confirm that the review email has been received and is available in the system.
-	2.	Check the last investigation assignment:
-	•	Identify the user/operator to whom the last investigation was assigned.
-	•	Verify that the operator exists and is active in the operator table.
-	3.	Check the receiver’s email in the Email Routing Table:
-	•	Use the receiver’s email address to find a match in the email routing table.
-	•	Retrieve the associated Distinction Work Basket based on routing rules.
-	4.	Check the Default Work Basket Table using the receiver’s email and subject:
-	•	Search the Default Work Basket Table with the receiver’s email and email subject.
-	•	If the business function is not found, assign the case to the default work basket.
+const historyVal = `
+  From: ${rowData.from}
+  To: ${rowData.to}
+  CC: ${rowData.cc}
+  BCC: ${rowData.bcc}
+  Date: ${rowData.receivedSentOn}
+  ${getCountryTime(rowData.receivedSentOn, this.caseOrgCountry)}
+  Subject: ${rowData.subject}
+  Processed Email History
+`;
