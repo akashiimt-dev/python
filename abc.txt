@@ -1,1 +1,137 @@
-Our platform offers various support services and consists of both front-end and back-end components. The front end focuses on design, analytics, and frameworks like Node.js, while the back end uses GraphQL and open-source Sparkus. We’ve implemented a three-layer security model, ensuring you can’t directly call the process API from the web; instead, the experience layer retrieves the data securely.
+import java.util.*;
+import java.util.stream.Collectors;
+
+class Email {
+    private String subject;
+    private String sender;
+
+    public Email(String subject, String sender) {
+        this.subject = subject;
+        this.sender = sender;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    @Override
+    public String toString() {
+        return "Email{subject='" + subject + "', sender='" + sender + "'}";
+    }
+}
+
+public class EmailFilter {
+    public static List<Email> sortAndFilterEmails(
+            List<Email> emails,
+            String subjectContains,
+            String subjectEquals,
+            String exactSender,
+            String senderDomain) {
+
+        if (emails == null || emails.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Step 1: Sort emails based on subject priority
+        List<Email> sortedEmails = emails.stream()
+                .sorted((e1, e2) -> {
+                    int priority1 = getSubjectPriority(e1, subjectContains, subjectEquals);
+                    int priority2 = getSubjectPriority(e2, subjectContains, subjectEquals);
+                    return Integer.compare(priority1, priority2);
+                })
+                .collect(Collectors.toList());
+
+        // Step 2: Filter emails based on sender criteria
+        return filterBySender(sortedEmails, exactSender, senderDomain);
+    }
+
+    // Assign priority based on subject
+    private static int getSubjectPriority(Email email, String subjectContains, String subjectEquals) {
+        String subject = email.getSubject() != null ? email.getSubject().toLowerCase() : "";
+
+        // Priority 1: Subject contains the substring
+        if (subjectContains != null && !subjectContains.isEmpty() &&
+                subject.contains(subjectContains.toLowerCase())) {
+            return 1;
+        }
+        // Priority 2: Subject exactly equals the specified value
+        if (subjectEquals != null && !subjectEquals.isEmpty() &&
+                subject.equalsIgnoreCase(subjectEquals)) {
+            return 2;
+        }
+        // Priority 3: Subject is blank (null or empty)
+        if (subject.isEmpty()) {
+            return 3;
+        }
+        // Priority 4: All other cases
+        return 4;
+    }
+
+    // Filter emails based on sender criteria
+    private static List<Email> filterBySender(List<Email> emails, String exactSender, String senderDomain) {
+        // Filter 1: Exact sender match
+        List<Email> result = emails.stream()
+                .filter(e -> exactSender != null && exactSender.equalsIgnoreCase(e.getSender()))
+                .collect(Collectors.toList());
+
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        // Filter 2: Sender domain match
+        result = emails.stream()
+                .filter(e -> {
+                    if (e.getSender() == null || senderDomain == null || senderDomain.isEmpty()) {
+                        return false;
+                    }
+                    String senderLower = e.getSender().toLowerCase();
+                    String domainLower = senderDomain.toLowerCase();
+                    return senderLower.endsWith("@" + domainLower) || senderLower.endsWith("." + domainLower);
+                })
+                .collect(Collectors.toList());
+
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        // Filter 3: Empty or null sender
+        result = emails.stream()
+                .filter(e -> e.getSender() == null || e.getSender().isEmpty())
+                .collect(Collectors.toList());
+
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        // Filter 4: No matches
+        return Collections.emptyList();
+    }
+
+    // Example usage
+    public static void main(String[] args) {
+        List<Email> emails = Arrays.asList(
+                new Email("Urgent: Action Required", "user@example.com"),
+                new Email("Meeting", "admin@company.com"),
+                new Email("", "sender@example.com"), // Blank subject (priority 3)
+                new Email(null, "manager@company.com"), // Blank subject (priority 3)
+                new Email("General Info", null),
+                new Email("Urgent: Follow Up", "user2@example.com"),
+                new Email("Meeting", "test@other.com"),
+                new Email("Random", "random@company.com")
+        );
+
+        String subjectContains = "urgent";
+        String subjectEquals = "meeting";
+        String exactSender = "user@example.com";
+        String senderDomain = "example.com";
+
+        List<Email> result = sortAndFilterEmails(emails, subjectContains, subjectEquals, exactSender, senderDomain);
+
+        System.out.println("Filtered Emails:");
+        result.forEach(System.out::println);
+    }
+}
