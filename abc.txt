@@ -1,54 +1,58 @@
-import java.lang.reflect.Method;
+import java.util.*;
+import java.lang.reflect.*;
+import java.util.stream.Collectors;
 
-public class ReflectionUtil {
-    public static Object getPropertyValue(Object instance, String propertyName) throws Exception {
-        // Capitalize the first letter of the property name to form the getter method name
+public class EmailSubjectSenderSorter<T> {
+
+    // Assign priority based on subject and property conditions using Streams
+    public List<T> getSubjectPriority(List<T> emailList, String subject, String propertyName1, String propertyName2) 
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        return emailList.stream()
+                .filter(email -> {
+                    try {
+                        String value1 = getPropertyValue(email, propertyName1);
+                        String value2 = getPropertyValue(email, propertyName2);
+
+                        // Check if first property contains "contains" keyword
+                        if (value1 != null && value1.toLowerCase().contains("contains")) {
+                            return value2 != null && value2.toLowerCase().contains(subject);
+                        }
+                        // Check if first property contains "equal"
+                        else if (value1 != null && value1.toLowerCase().contains("equal")) {
+                            return value2 != null && value2.equalsIgnoreCase(subject);
+                        }
+                        // Include if subject is blank or null
+                        else {
+                            return value1 == null || value1.trim().isEmpty();
+                        }
+                    } catch (Exception e) {
+                        return false; // Skip on exception
+                    }
+                })
+                .sorted((e1, e2) -> {
+                    try {
+                        Method getIdMethod = e1.getClass().getMethod("getId");
+                        Long id1 = (Long) getIdMethod.invoke(e1);
+                        Long id2 = (Long) getIdMethod.invoke(e2);
+                        return id2.compareTo(id1); // Sort descending for latest first
+                    } catch (Exception e) {
+                        return 0; // Default if sorting fails
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Helper method to get property value using reflection
+    @SuppressWarnings("unchecked")
+    private String getPropertyValue(Object instance, String propertyName) 
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (instance == null || propertyName == null) return null;
+
         String methodName = "get" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
-        
-        // Get the class of the instance
         Class<?> clazz = instance.getClass();
-        
-        // Get the getter method
         Method method = clazz.getMethod(methodName);
-        
-        // Invoke the method on the instance and return the result
-        return method.invoke(instance);
-    }
+        Object result = method.invoke(instance);
 
-    // Example usage
-    public static void main(String[] args) {
-        try {
-            // Example class with a getter
-            Person person = new Person("Alice", 30);
-            
-            // Get the value of the "name" property
-            Object name = getPropertyValue(person, "name");
-            System.out.println("Name: " + name); // Output: Name: Alice
-            
-            // Get the value of the "age" property
-            Object age = getPropertyValue(person, "age");
-            System.out.println("Age: " + age); // Output: Age: 30
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
-
-// Example class
-class Person {
-    private String name;
-    private int age;
-
-    public Person(String name, int age) {
-        this.name = name;
-        this.age = age;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getAge() {
-        return age;
+        return result != null ? result.toString() : null;
     }
 }
