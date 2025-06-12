@@ -1,58 +1,88 @@
 import java.util.*;
-import java.lang.reflect.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class EmailSubjectSenderSorter<T> {
+public class EmailFilter {
+    public static List<String> filterEmails(List<String> emails, String senderAddress) {
+        if (emails == null || senderAddress == null || emails.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-    // Assign priority based on subject and property conditions using Streams
-    public List<T> getSubjectPriority(List<T> emailList, String subject, String propertyName1, String propertyName2) 
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        return emailList.stream()
-                .filter(email -> {
-                    try {
-                        String value1 = getPropertyValue(email, propertyName1);
-                        String value2 = getPropertyValue(email, propertyName2);
+        // Regex pattern for domain extraction (after @)
+        Pattern domainPattern = Pattern.compile("@([\\w\\-.]+)");
+        Matcher senderMatcher = domainPattern.matcher(senderAddress);
+        String senderDomain = senderMatcher.find() ? senderMatcher.group(1) : "";
 
-                        // Check if first property contains "contains" keyword
-                        if (value1 != null && value1.toLowerCase().contains("contains")) {
-                            return value2 != null && value2.toLowerCase().contains(subject);
-                        }
-                        // Check if first property contains "equal"
-                        else if (value1 != null && value1.toLowerCase().contains("equal")) {
-                            return value2 != null && value2.equalsIgnoreCase(subject);
-                        }
-                        // Include if subject is blank or null
-                        else {
-                            return value1 == null || value1.trim().isEmpty();
-                        }
-                    } catch (Exception e) {
-                        return false; // Skip on exception
-                    }
-                })
-                .sorted((e1, e2) -> {
-                    try {
-                        Method getIdMethod = e1.getClass().getMethod("getId");
-                        Long id1 = (Long) getIdMethod.invoke(e1);
-                        Long id2 = (Long) getIdMethod.invoke(e2);
-                        return id2.compareTo(id1); // Sort descending for latest first
-                    } catch (Exception e) {
-                        return 0; // Default if sorting fails
-                    }
-                })
+        // Step 1: Exact match with sender address, ignoring @
+        String senderWithoutAt = senderAddress.replace("@", "");
+        List<String> filteredEmails = emails.stream()
+            .filter(email -> email.replace("@", "").equalsIgnoreCase(senderWithoutAt))
+            .collect(Collectors.toList());
+
+        if (!filteredEmails.isEmpty()) {
+            return filteredEmails;
+        }
+
+        // Step 2: Check for "no data" (case-insensitive)
+        Pattern noDataPattern = Pattern.compile("(?i)^no\\s*data$");
+        filteredEmails = emails.stream()
+            .filter(email -> noDataPattern.matcher(email).matches())
+            .collect(Collectors.toList());
+
+        if (!filteredEmails.isEmpty()) {
+            return filteredEmails;
+        }
+
+        // Step 3: Match by domain if senderDomain is not empty
+        if (!senderDomain.isEmpty()) {
+            // Regex pattern to match emails with the same domain (case-insensitive)
+            String domainRegex = "(?i)@\\Q" + senderDomain + "\\E$";
+            Pattern domainMatchPattern = Pattern.compile(domainRegex);
+            
+            filteredEmails = emails.stream()
+                .filter(email -> domainMatchPattern.matcher(email).find())
                 .collect(Collectors.toList());
+        }
+
+        return filteredEmails.isEmpty() ? Collections.emptyList() : filteredEmails;
     }
 
-    // Helper method to get property value using reflection
-    @SuppressWarnings("unchecked")
-    private String getPropertyValue(Object instance, String propertyName) 
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if (instance == null || propertyName == null) return null;
+    // Example usage
+    public static void main(String[] args) {
+        List<String> emails = Arrays.asList(
+            "test@example.com",
+            "user@domain.com",
+            "no data",
+            "another@domain.com",
+            "test2@example.com",
+            "No Data",
+            "invalid.email@Domain.com",
+            "userdomain.com" // Matches user@domain.com when ignoring @
+        );
+        String senderAddress = "user@domain.com";
 
-        String methodName = "get" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
-        Class<?> clazz = instance.getClass();
-        Method method = clazz.getMethod(methodName);
-        Object result = method.invoke(instance);
+        List<String> result = filterEmails(emails, senderAddress);
+        System.out.println("Filtered emails (exact match ignoring @): " + result);
 
-        return result != null ? result.toString() : null;
+        // Test with domain match
+        senderAddress = "newuser@domain.com";
+        result = filterEmails(emails, senderAddress);
+        System.out.println("Filtered emails (domain match): " + result);
+
+        // Test with no matches
+        senderAddress = "nonexistent@other.com";
+        result = filterEmails(emails, senderAddress);
+        System.out.println("Filtered emails (no match): " + result);
+
+        // Test with "no data" sender
+        senderAddress = "no data";
+        result = filterEmails(emails, senderAddress);
+        System.out.println("Filtered emails (no data): " + result);
+
+        // Test with sender without @
+        senderAddress = "userdomain.com";
+        result = filterEmails(emails, senderAddress);
+        System.out.println("Filtered emails (sender without @): " + result);
     }
 }
