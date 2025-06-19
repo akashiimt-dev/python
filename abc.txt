@@ -1,7 +1,41 @@
-am writing to formally report an incident of unprofessional and abusive behavior by my manager, [Manager’s Name], that occurred on June 13, 2025, at approximately [Time, if known] in [Location, e.g., main office room]. This incident has caused me significant distress and contributes to an ongoing hostile work environment.
-Details of the Incident
-On June 13, 2025, after returning from a meeting with [Super Boss’s Name/Title], [Manager’s Name] engaged in highly inappropriate conduct. Specifically, [he/she] raised [his/her] voice, used abusive and derogatory language, and made threatening remarks that I perceived as life-threatening. This behavior violated [Company Name]’s Code of Conduct and created an unsafe and intimidating workplace.
-Pattern of Behavior
-This is not an isolated incident. I have experienced similar instances of unprofessional and abusive behavior from [Manager’s Name] on multiple occasions, including [briefly describe recurring behaviors, e.g., “frequent verbal abuse” or “intimidating remarks”]. These incidents have fostered a toxic work environment, adversely affecting my mental health and ability to perform my duties. I have documentation, such as [e.g., emails, notes, or records], which I can provide upon request to support these claims.
-Barriers to Prior Reporting
-I previously hesitated to report these issues due to [Manager’s Name]’s influential position and [his/her] close professional relationship with [Satya’s Name], a senior leader in [Department/Organization]. This dynamic made me feel that my concerns might not be addressed impartially. However, the severity of the recent incident compels me to seek formal resolution in accordance with [Company Name]’s policies
+ADO Story: Catalyst FileNet Testing - FileNet API Project Analysis and Reconfiguration
+Title
+Catalyst FileNet Testing: Filter FileNet API Projects, Analyze Payloads, Reconfigure, and Retest
+Description
+Filter all Catalyst projects using the FileNet API, analyze payloads including Kong token configurations starting from timeline 13176, reconfigure code as needed, and retest to ensure secure and functional API integrations.
+Acceptance Criteria
+	1	Project Filtering: Identify and list all projects using FileNet API with details on API usage.
+	2	Payload Analysis: Retrieve and document payloads with Kong tokens from timeline 13176 onward.
+	3	Kong Token Reconfiguration: Review and update Kong token handling for security and compliance.
+	4	Code Analysis: Analyze code; implement changes if needed or justify no changes with evidence.
+	5	Retesting: Test updated configurations, validate payloads, and document results.
+	6	Documentation: Provide a report with findings, changes, test results, and timeline.
+Tasks
+	1	Filter projects using FileNet API.
+	2	Extract and analyze payloads with Kong tokens.
+	3	Review and reconfigure Kong token settings.
+	4	Analyze and update FileNet API integration code.
+	5	Retest APIs and validate functionality.
+	6	Document findings and timeline.
+Story Points
+	•	Effort: 8 story points
+Priority
+	•	High
+Timeline
+	•	Start: Timeline 13176 (TBD: sprint/date)
+	•	Duration: 4-6 weeks
+	•	Milestones:
+	◦	Week 1: Filter projects, extract payloads.
+	◦	Week 2: Analyze payloads, tokens.
+	◦	Week 3: Update code.
+	◦	Week 4: Retest, document.
+Notes
+	•	Payloads: Expect HTTP requests with FileNet API calls and Kong tokens (e.g., Authorization headers).
+	•	Reconfiguration: Update to dynamic Kong token retrieval if needed (e.g., OAuth2).
+	•	Risks: Limited payload access or Kong configuration restrictions may delay progress.
+Tags
+	•	FileNet, Kong Gateway, Catalyst, Testing
+Clarifications Needed
+	•	Define timeline 13176 (sprint/date).
+	•	Confirm payload storage location and access.
+	•	Specify Kong token scope (FileNet-specific or shared).
