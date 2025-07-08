@@ -1,1 +1,114 @@
-xyz
+Validate Navigation to New EOPS URL
+•  Objective: Ensure bots can access and log into the new EOPS URL for the three processes.
+•  Test Case 1.1: OpenSpan Bot Navigation
+	•  Precondition: OpenSpan bot is configured with new URL; RDA access granted.
+	•  Steps:
+		1.  Launch OpenSpan bot.
+		2.  Navigate to the new EOPS URL.
+		3.  Verify login page loads.
+		4.  Log in with valid credentials.
+	•  Expected Result: Bot accesses URL, loads login page, and logs in.
+	•  Test Data: New EOPS URL, valid credentials.
+•  Test Case 1.2: Intellibot Navigation
+	•  Precondition: Intellibot is configured; access granted.
+	•  Steps:
+		1.  Start Intellibot workflow.
+		2.  Navigate to new EOPS URL.
+		3.  Confirm login page loads.
+		4.  Log in with valid credentials.
+	•  Expected Result: Bot reaches login page and logs in.
+	•  Test Data: New EOPS URL, valid credentials.
+Test Scenario 2: Validate Controls for Three Processes
+•  Objective: Verify controls function correctly for the three processes per tool.
+•  Test Case 2.1: OpenSpan Control Validation for Process 1 (e.g., Customer Data Entry)
+	•  Precondition: Bot is logged in; test data available.
+	•  Steps:
+		1.  Navigate to Customer Data Entry screen.
+		2.  Interact with controls (e.g., input name, select dropdown, click submit).
+		3.  Submit form.
+		4.  Verify data is saved without errors.
+	•  Expected Result: Controls function as expected; data processed.
+	•  Test Data: Valid customer data (e.g., name, ID).
+•  Test Case 2.2: Intellibot Control Validation for Process 1
+	•  Precondition: Bot is logged in; test data ready.
+	•  Steps:
+		1.  Access Customer Data Entry screen.
+		2.  Interact with controls (e.g., enter data, select options, submit).
+		3.  Confirm submission is successful.
+		4.  Check for errors.
+	•  Expected Result: Controls work correctly; data saved.
+	•  Test Data: Valid customer data.
+•  Note: Similar test cases (2.3–2.6) will be created for Process 2 and Process 3 for both tools.
+Test Scenario 3: Assess Changes in EOPS for Three Processes
+•  Objective: Identify UI/control changes in EOPS for the three processes.
+•  Test Case 3.1: OpenSpan Change Assessment for Process 1
+	•  Precondition: Bot configured; baseline of old EOPS documented.
+	•  Steps:
+		1.  Run Process 1 in new EOPS environment.
+		2.  Log errors (e.g., missing controls, UI changes).
+		3.  Compare with baseline.
+		4.  Document changes (e.g., new field, button relocated).
+	•  Expected Result: Changes identified and documented.
+	•  Test Data: Process inputs.
+•  Test Case 3.2: Intellibot Change Assessment for Process 1
+	•  Precondition: Bot configured; baseline exists.
+	•  Steps:
+		1.  Execute Process 1 in new EOPS environment.
+		2.  Record deviations (e.g., control failures).
+		3.  Compare with baseline.
+		4.  Document findings.
+	•  Expected Result: Changes captured accurately.
+	•  Note: Similar test cases (3.3–3.6) for Process 2 and Process 3.
+Test Scenario 4: Validate RDA Access for Three Processes
+•  Objective: Ensure bots operate within authorized access for the processes.
+•  Test Case 4.1: OpenSpan RDA Access
+	•  Precondition: RDA access granted to test user.
+	•  Steps:
+		1.  Launch bot with test user profile.
+		2.  Attempt access to EOPS features for Process 1.
+		3.  Verify access aligns with permissions.
+	•  Expected Result: Bot operates within access boundaries.
+	•  Test Data: RDA credentials.
+•  Test Case 4.2: Intellibot RDA Access
+	•  Precondition: RDA access configured.
+	•  Steps:
+		1.  Start workflow with test user profile.
+		2.  Test access to EOPS features for Process 1.
+		3.  Confirm permissions enforced.
+	•  Expected Result: Bot functions within authorized access.
+6. Test Execution Plan
+•  Timeline:
+	•  Week 1: Finalize test plan, confirm three processes, develop test cases.
+	•  Week 2: Set up environment, provision access, prepare test data.
+	•  Week 3: Execute tests for three processes per tool.
+	•  Week 4: Assess changes, log defects, retest, finalize reports.
+•  Roles:
+	•  Test Lead: Oversees planning and execution.
+	•  RPA Developers: Configure bots.
+	•  Testers: Run test cases, log defects in ADO.
+	•  Business Analysts: Validate process requirements and data.
+	•  IT Team: Provide URL access and environment.
+•  Entry Criteria:
+	•  Environment ready.
+	•  Bots configured for three processes.
+	•  Test data and access available.
+•  Exit Criteria:
+	•  All test cases for three processes executed.
+	•  Critical/high defects resolved.
+	•  Changes documented; results approved.
+7. Defect Management
+•  Defect Logging: Log in ADO with details (steps, screenshots, severity).
+•  Severity Levels:
+	•  Critical: Navigation or process failure.
+	•  High: Control validation failure impacting process.
+	•  Medium: Minor UI issues with workarounds.
+	•  Low: Cosmetic issues.
+•  Resolution:
+	•  Assign to developers.
+	•  Retest fixes.
+	•  Update ADO status.
+8. Creating a Story in Azure DevOps (ADO)
+To track the testing effort for the three processes, create a user story in ADO:
+ADO Story Details
+•  Title: Analyze Three Processes of EOPS Application with OpenSpan and Intellibot
+•  Description:
