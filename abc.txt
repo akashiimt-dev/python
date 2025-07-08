@@ -112,3 +112,25 @@ To track the testing effort for the three processes, create a user story in ADO:
 ADO Story Details
 •  Title: Analyze Three Processes of EOPS Application with OpenSpan and Intellibot
 •  Description:
+
+As an RPA tester, I want to analyze three processes of the updated EOPS application using OpenSpan and Intellibot bots to ensure navigation to the new URL, validation of controls, and identification of changes, so that the integration is seamless.
+
+**Background**:
+The EOPS application has a new URL and updated controls. We will analyze three processes per tool to validate functionality and assess changes.
+
+**Scope**:
+- Validate navigation to new EOPS URL for three processes.
+- Test controls for three processes per tool.
+- Identify and document changes in EOPS.
+- Verify RDA access for test users.
+
+**Dependencies**:
+- Access to new EOPS URL and test data.
+- RDA access for test profiles.
+- Bot configuration for new URL.
+
+**Assumptions**:
+- Test environment mirrors production.
+- Test data available for three processes.
+- EOPS changes documented.
+
