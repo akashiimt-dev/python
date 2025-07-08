@@ -134,3 +134,18 @@ The EOPS application has a new URL and updated controls. We will analyze three p
 - Test data available for three processes.
 - EOPS changes documented.
 
+Acceptance Criteria:
+	1.  Bots navigate to new EOPS URL and log in for all three processes.
+	2.  Controls for three processes per tool function as expected.
+	3.  EOPS changes for three processes identified and documented.
+	4.  Bots operate within RDA access limits.
+	5.  At least 1–2 test cases per process validate navigation and controls.
+•  Tasks:
+	•  Develop test cases for three processes in ADO.
+	•  Configure bots for new URL.
+	•  Execute tests and log defects.
+	•  Document changes and finalize reports.
+•  Priority: High
+•  Tags: EOPS, OpenSpan, Intellibot, RPA, Testing
+
+
