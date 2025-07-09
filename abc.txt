@@ -1,10 +1,77 @@
-Hi Raj,
-Thank you for your email. I’ve outlined the work items I’m currently handling along with their percentage allocations and criticality levels based on ongoing priorities:
-•  One Aasan installment change for Pak (HyperCare support): 20% - High criticality (Supporting HyperCare needs and aligning with the team for stability).
-•  Banca CR implementation and monitoring: 15% - Moderate criticality (Implementing and monitoring as a template change, no major updates required).
-•  Pega retail project engagement: 15% - Moderate criticality (Engaging with Vasu’s input and ongoing coordination).
-•  File net catalyst change support: 15% - Moderate criticality (Supporting the change process with the team).
-•  Process coordination and understanding for changes: 35% - High criticality (Requires time for coordination and understanding multiple processes).
-These percentages may vary if my workload shifts, and I’m actively supporting all tasks to ensure smooth progress. Please let me know if you need further details or adjustments.
-Regards,
-Akash
+EPIC: Update All Templates to Reflect New Acro Key Configuration
+Epic ID: [EPIC-XXXX]
+Status: Draft
+Created Date: July 09, 2025
+Last Updated: July 09, 2025
+Priority: [High/Medium/Low - TBD]
+Owner: [TBD - Engineering Lead/Team]
+Stakeholders: [Product Manager, Development Team, QA Team, DevOps]
+
+1. Epic Summary
+The Acro key used in the template configuration has changed, requiring updates across all templates in the codebase. This EPIC covers the identification, modification, testing, and deployment of all affected templates to ensure seamless integration with the new Acro key configuration.
+
+2. Background and Context
+•  Current State: The existing templates in the codebase are configured with an outdated Acro key, which is no longer compatible with the updated system requirements.
+•  Change Trigger: A system update or external dependency has modified the Acro key, necessitating a comprehensive update to all templates.
+•  Impact: Failure to update the templates will result in configuration errors, broken functionality, or system downtime.
+
+3. Objectives
+•  Identify all templates in the codebase that use the outdated Acro key.
+•  Update the template configurations to align with the new Acro key.
+•  Ensure backward compatibility (if required) or handle deprecated configurations.
+•  Validate the updated templates through unit, integration, and end-to-end testing.
+•  Deploy the changes with minimal disruption to production systems.
+•  Document the changes for future reference and maintainability.
+
+4. Scope
+In-Scope:
+•  All templates in the codebase (e.g., UI templates, API response templates, configuration files, etc.) that reference the Acro key.
+•  Code changes to update the Acro key configuration.
+•  Automated and manual testing to validate the changes.
+•  Deployment of updated templates to staging and production environments.
+•  Documentation updates to reflect the new Acro key configuration.
+Out-of-Scope:
+•  Changes to templates that do not use the Acro key.
+•  Modifications to unrelated system components or dependencies.
+•  Creation of new templates unless explicitly required for the Acro key update.
+
+5. User Stories
+Below are example user stories to break down the work into manageable tasks:
+1.  Story 1: Identify Affected Templates
+	•  As a developer, I need to identify all templates in the codebase that use the outdated Acro key so that I can prioritize and plan the updates.
+	•  Acceptance Criteria:
+		•  Generate a list of all templates referencing the old Acro key.
+		•  Categorize templates by module or functionality.
+		•  Share the list with stakeholders for validation.
+2.  Story 2: Update Template Configurations
+	•  As a developer, I need to update the Acro key in all affected templates to the new configuration so that the system functions correctly.
+	•  Acceptance Criteria:
+		•  Replace the old Acro key with the new key in all identified templates.
+		•  Ensure no syntax or formatting errors are introduced.
+		•  Validate changes via code review.
+3.  Story 3: Test Updated Templates
+	•  As a QA engineer, I need to test the updated templates to ensure they work as expected with the new Acro key.
+	•  Acceptance Criteria:
+		•  Execute unit tests for individual templates.
+		•  Perform integration tests to verify system-wide compatibility.
+		•  Conduct end-to-end tests to confirm user-facing functionality.
+		•  Report and resolve any defects.
+4.  Story 4: Deploy Changes
+	•  As a DevOps engineer, I need to deploy the updated templates to production with minimal downtime.
+	•  Acceptance Criteria:
+		•  Deploy changes to a staging environment for final validation.
+		•  Execute production deployment during a low-traffic window.
+		•  Monitor system health post-deployment.
+5.  Story 5: Update Documentation
+	•  As a technical writer, I need to update the system documentation to reflect the new Acro key configuration.
+	•  Acceptance Criteria:
+		•  Document the new Acro key and its usage.
+		•  Update any relevant guides or README files.
+		•  Share updated documentation with the team.
+
+6. Success Criteria
+•  All templates in the codebase are updated to use the new Acro key.
+•  No regression issues are reported in testing or production.
+•  System performance and functionality remain unaffected post-deployment.
+•  Documentation is updated and accessible to the team.
+•  Stakeholder approval is received for the completed changes.
